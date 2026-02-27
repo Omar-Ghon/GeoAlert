@@ -1,0 +1,11 @@
+.mainView {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .mainViewContent {
+    flex: 1 1 auto;
+    padding: 24px;
+    background: #f7f9fc;
+  }
+}
