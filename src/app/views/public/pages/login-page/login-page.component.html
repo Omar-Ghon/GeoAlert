@@ -1,0 +1,51 @@
+<div class="login-page">
+  <button class="back-button" type="button" (click)="goBack()" aria-label="Go back to main view">
+    <img src="/assets/icons/chevron-left.svg" alt="Back" />
+  </button>
+
+  <div class="login-page-card">
+    <h1 class="login-page-title">Login</h1>
+
+    <form class="login-page-form" [formGroup]="loginForm">
+      <div class="login-page-field">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="Enter username"
+        />
+      </div>
+
+      <div class="login-page-field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter password"
+        />
+      </div>
+
+      <p class="login-page-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </p>
+
+      <button
+        class="login-page-button login-page-button--operator"
+        type="button"
+        (click)="loginAsOperator()"
+      >
+        Login as Operator
+      </button>
+
+      <button
+        class="login-page-button login-page-button--administrator"
+        type="button"
+        (click)="loginAsAdministrator()"
+      >
+        Login as Administrator
+      </button>
+    </form>
+  </div>
+</div>
