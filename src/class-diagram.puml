@@ -1,0 +1,43 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+enum SensorStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  RATE_LIMITED
+}
+
+class Sensor {
+  + sensorID: UUID
+  - location: Zone
+  - status: SensorStatus
+  --
+  + getReading(): SensorReading
+  + getStatus(): SensorStatus
+}
+
+class AirQualitySensor {
+  - AQI: float
+}
+
+class NoiseSensor {
+  - decibels: float
+}
+
+class TemperatureSensor {
+  - temperatureC: float
+  --
+  - toFarenheit()
+  - toKelvin()
+  + getTemp(type: string)
+}
+
+AirQualitySensor -up-|> Sensor
+NoiseSensor -up-|> Sensor
+TemperatureSensor -up-|> Sensor
+
+Sensor *-left- SensorStatus
+
+@enduml

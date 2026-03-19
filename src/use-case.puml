@@ -1,0 +1,59 @@
+@startuml name
+left to right direction
+
+rectangle "SCEMAS" {
+
+  (Open Admin View) as UC_OpenAdmin
+  (Login) as UC_Login
+  (Open Operator View) as UC_OpenOperator
+  (Open User View) as UC_OpenUser
+
+  (Modify Alert) as UC_ModifyAlert
+  (Create Alert) as UC_CreateAlert
+  (Request Audit Log) as UC_RequestAudit
+
+  (Authenticate) as UC_Authenticate
+
+  (View Specific Data) as UC_ViewSpecific
+  (Acknowledge Alert) as UC_AckAlert
+
+  (Copy Public API) as UC_CopyAPI
+  (View Aggregate Data) as UC_ViewAggregate
+}
+
+actor Administrator as A_Admin
+actor "City Operator" as A_Operator
+actor Public as A_Public
+actor User as A_User
+actor "3rd Party Devs" as A_ThirdParty
+actor Authenticator as A_Authenticator
+
+' Actor generalization
+A_User -down-|> A_Public
+A_ThirdParty -left-|> A_Public
+
+' Associations
+A_Admin --> UC_OpenAdmin
+A_Admin --> UC_Login
+
+A_Operator --> UC_Login
+A_Operator --> UC_OpenOperator
+
+A_Public --> UC_OpenUser
+
+A_Authenticator -up-> UC_Authenticate
+
+' Includes / Extends
+UC_Login ..> UC_Authenticate : <<includes>>
+
+UC_OpenAdmin <.. UC_ModifyAlert : <<extends>>
+UC_OpenAdmin <.. UC_CreateAlert : <<extends>>
+UC_OpenAdmin <.. UC_RequestAudit : <<extends>>
+
+UC_OpenOperator <.. UC_ViewSpecific : <<extends>>
+UC_OpenOperator <.. UC_AckAlert : <<extends>>
+
+UC_OpenUser <.. UC_CopyAPI : <<extends>>
+UC_OpenUser ..> UC_ViewAggregate : <<includes>>
+
+@enduml
