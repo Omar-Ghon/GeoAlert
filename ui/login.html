@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="loginPage">
+    <a href="index.html" class="backButton">← Back</a>
+    <section class="loginCard">
+      <h1 class="loginTitle">GeoAlert Login</h1>
+      <p class="loginSubtitle">Sign in to continue</p>
+
+      <form class="loginForm" id="loginForm">
+        <div class="formGroup">
+          <label for="username" class="formLabel">Username</label>
+          <input
+            type="text"
+            id="username"
+            class="formInput"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="formGroup">
+          <label for="password" class="formLabel">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="formInput"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <p class="loginError" id="loginError">Incorrect username or password.</p>
+
+        <button type="submit" class="loginButton">Submit</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="../script.js"></script>
+</body>
+</html>

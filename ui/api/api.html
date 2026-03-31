@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoAlert API</title>
+  <link rel="stylesheet" href="api.css">
+</head>
+<body>
+
+<main class="apiPage">
+  <section class="apiShell">
+    <a href="../index.html" class="backButton">← Back</a>
+    <div class="apiHero">
+      <div class="apiHeroContent">
+        <p class="apiEyebrow">Developer Documentation</p>
+        <h2 class="apiHeading">GeoAlert Public API</h2>
+        <p class="apiLead">
+          The GeoAlert Public API provides read-only access to aggregated, non-sensitive
+          environmental monitoring data for public dashboards, third-party apps, and
+          digital signage integrations.
+        </p>
+      </div>
+
+      <div class="apiHeroMeta">
+        <div class="apiMetaCard">
+          <span class="apiMetaLabel">Version</span>
+          <span class="apiMetaValue">v1</span>
+        </div>
+        <div class="apiMetaCard">
+          <span class="apiMetaLabel">Protocol</span>
+          <span class="apiMetaValue">REST / JSON</span>
+        </div>
+        <div class="apiMetaCard">
+          <span class="apiMetaLabel">Access</span>
+          <span class="apiMetaValue">Read-Only</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="apiSection">
+      <div class="apiSectionHeader">
+        <h3 class="apiSectionTitle">Base URL</h3>
+      </div>
+
+      <div class="apiCodeBlock">
+        <code>https://api.geoalert.city/v1</code>
+      </div>
+    </section>
+
+    <section class="apiSection apiTwoColumn">
+      <div class="apiInfoCard">
+        <h3 class="apiCardTitle">Authentication</h3>
+        <p class="apiCardText">
+          Third-party developers can request an API key and include it in the request header.
+          Public browser demos may use mock keys during development.
+        </p>
+        <div class="apiCodeBlock">
+          <code>x-api-key: YOUR_API_KEY</code>
+        </div>
+      </div>
+
+      <div class="apiInfoCard">
+        <h3 class="apiCardTitle">Rate Limiting</h3>
+        <p class="apiCardText">
+          The public API is rate-limited to protect availability and reduce scraping or abuse.
+          Example limit: 60 requests per minute per API key.
+        </p>
+        <div class="apiCodeBlock">
+          <code>429 Too Many Requests</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="apiSection">
+      <div class="apiSectionHeader">
+        <h3 class="apiSectionTitle">Available Endpoints</h3>
+        <p class="apiSectionSubtitle">
+          All endpoints return JSON. These examples are mocked for the project demo.
+        </p>
+      </div>
+
+      <div class="endpointList">
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/zones</code>
+          </div>
+          <p class="endpointDescription">
+            Returns all supported monitoring zones available through the public API.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>[
+  {
+    "id": "downtownCore",
+    "name": "Downtown Core"
+  },
+  {
+    "id": "westIndustrial",
+    "name": "West Industrial"
+  },
+  {
+    "id": "northResidential",
+    "name": "North Residential"
+  }
+]</code></pre>
+          </div>
+        </article>
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/zones/:zoneId/current</code>
+          </div>
+          <p class="endpointDescription">
+            Returns the latest aggregated environmental values for a single zone.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>{
+  "zoneId": "downtownCore",
+  "zoneName": "Downtown Core",
+  "updatedAt": "2026-03-31T10:42:00Z",
+  "metrics": {
+    "airQualityIndex": 72,
+    "temperatureC": 24,
+    "humidityPercent": 58,
+    "noiseDb": 81
+  }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/zones/:zoneId/history?metric=airQuality&amp;range=24h</code>
+          </div>
+          <p class="endpointDescription">
+            Returns historical aggregated data points for one metric within a requested time range.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>{
+  "zoneId": "downtownCore",
+  "metric": "airQuality",
+  "range": "24h",
+  "points": [
+    { "timestamp": "2026-03-31T06:00:00Z", "value": 61 },
+    { "timestamp": "2026-03-31T08:00:00Z", "value": 67 },
+    { "timestamp": "2026-03-31T10:00:00Z", "value": 72 }
+  ]
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/zones/:zoneId/aqi</code>
+          </div>
+          <p class="endpointDescription">
+            Returns the current Air Quality Index summary for a zone for quick public display.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>{
+  "zoneId": "downtownCore",
+  "aqi": 72,
+  "category": "Moderate",
+  "updatedAt": "2026-03-31T10:42:00Z"
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/alerts/public</code>
+          </div>
+          <p class="endpointDescription">
+            Returns currently active public alerts that have already been acknowledged and published.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>[
+  {
+    "id": "alert-204",
+    "zoneId": "westIndustrial",
+    "type": "Air Quality",
+    "severity": "High",
+    "message": "Elevated particulate concentration detected.",
+    "status": "Active"
+  }
+]</code></pre>
+          </div>
+        </article>
+
+        <article class="endpointCard">
+          <div class="endpointTopRow">
+            <span class="endpointMethod">GET</span>
+            <code class="endpointPath">/health</code>
+          </div>
+          <p class="endpointDescription">
+            Returns a lightweight status response indicating API availability.
+          </p>
+          <div class="apiCodeBlock">
+<pre><code>{
+  "status": "ok",
+  "service": "GeoAlert Public API",
+  "version": "v1"
+}</code></pre>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="apiSection apiTwoColumn">
+      <div class="apiInfoCard">
+        <h3 class="apiCardTitle">Example Request</h3>
+        <div class="apiCodeBlock">
+<pre><code>GET /v1/zones/downtownCore/current HTTP/1.1
+Host: api.geoalert.city
+x-api-key: demo_public_key_123</code></pre>
+        </div>
+      </div>
+
+      <div class="apiInfoCard">
+        <h3 class="apiCardTitle">Example Use Cases</h3>
+        <ul class="apiBulletList">
+          <li>Public environmental dashboards</li>
+          <li>Transit station or kiosk displays</li>
+          <li>Municipal open-data integrations</li>
+          <li>Student or research visualization tools</li>
+        </ul>
+      </div>
+    </section>
+  </section>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,450 @@
+.siteHeader {
+  max-width: 100%;
+  height: 88px;
+  padding: 0 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #d9e1e7;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.siteHeader .siteHeaderLeft,
+.siteHeader .siteHeaderCenter,
+.siteHeader .siteHeaderRight {
+  display: flex;
+  align-items: center;
+}
+.siteHeader .siteHeaderLeft {
+  flex: 1;
+  justify-content: flex-start;
+}
+.siteHeader .siteHeaderCenter {
+  flex: 1;
+  justify-content: center;
+}
+.siteHeader .siteHeaderRight {
+  flex: 1;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.siteHeader .siteHeaderLogo {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f4f8fb;
+  border: 1px solid #d9e1e7;
+  text-decoration: none;
+  overflow: hidden;
+}
+.siteHeader .siteHeaderLogo img {
+  width: 30px;
+  height: 30px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  display: block;
+}
+.siteHeader .siteHeaderTitle {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #16384c;
+  line-height: 1;
+}
+.siteHeader .siteHeaderButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.siteHeader .siteHeaderButtonSecondary {
+  background: #f4f8fb;
+  color: #16384c;
+  border: 1px solid #cfdbe4;
+}
+.siteHeader .siteHeaderButtonSecondary:hover {
+  background: #eaf2f7;
+}
+.siteHeader .siteHeaderButtonPrimary {
+  background: #1f5f85;
+  color: #ffffff;
+}
+.siteHeader .siteHeaderButtonPrimary:hover {
+  background: #184b69;
+}
+
+/* LOGIN PAGE */
+.loginPage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  padding: 5rem 2rem 2rem;
+  background: #f4f8fb;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.loginPage .backButton {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid #cfdbe4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #16384c;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+.loginPage .backButton:hover {
+  background: #eaf2f7;
+}
+.loginPage .loginCard {
+  width: 100%;
+  max-width: 460px;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #d9e1e7;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-top: 3rem;
+}
+.loginPage .loginCard .loginTitle {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #16384c;
+  text-align: center;
+}
+.loginPage .loginCard .loginSubtitle {
+  margin: 0 0 30px 0;
+  font-size: 1rem;
+  color: #5d7282;
+  text-align: center;
+}
+.loginPage .loginCard .loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.loginPage .loginCard .loginForm .formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.loginPage .loginCard .loginForm .formGroup .formLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #16384c;
+}
+.loginPage .loginCard .loginForm .formGroup .formInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #cfdbe4;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #16384c;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.loginPage .loginCard .loginForm .formGroup .formInput:focus {
+  border-color: #1f5f85;
+  box-shadow: 0 0 0 3px rgba(31, 95, 133, 0.12);
+}
+.loginPage .loginCard .loginForm .loginError {
+  display: none;
+  margin: -4px 0 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e2a4a4;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #a12b2b;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.loginPage .loginCard .loginForm .loginError.show {
+  display: block;
+}
+.loginPage .loginCard .loginForm .loginButton {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: #1f5f85;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.loginPage .loginCard .loginForm .loginButton:hover {
+  background: #184b69;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f8fb;
+  color: #16384c;
+}
+
+.dashboardPage {
+  min-height: calc(100vh - 88px);
+  padding: 36px 40px 48px;
+}
+
+.dashboardShell {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.dashboardTopRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 32px;
+}
+.dashboardTopRow .dashboardHeadingWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dashboardTopRow .dashboardEyebrow {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5d7282;
+}
+.dashboardTopRow .dashboardHeading {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #16384c;
+}
+.dashboardTopRow .dashboardMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+.dashboardTopRow .dashboardMetaItem {
+  font-size: 1.35rem;
+  color: #5d7282;
+}
+.dashboardTopRow .dashboardMetaItem strong {
+  color: #16384c;
+  font-weight: 700;
+}
+.dashboardTopRow .dashboardMetaDivider {
+  width: 1px;
+  height: 20px;
+  background: #cfdbe4;
+}
+.dashboardTopRow .zoneSelectorWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-right: 3rem;
+}
+.dashboardTopRow .zoneSelectorLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5d7282;
+}
+.dashboardTopRow .zoneSelector {
+  position: relative;
+  width: 15rem;
+  margin-right: 1rem;
+}
+.dashboardTopRow .zoneSearchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid #cfdbe4;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #16384c;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dashboardTopRow .zoneSearchInput:focus {
+  border-color: #1f5f85;
+  box-shadow: 0 0 0 3px rgba(31, 95, 133, 0.12);
+}
+.dashboardTopRow .zoneDropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid #d9e1e7;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+}
+.dashboardTopRow .zoneSelector.open .zoneDropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dashboardTopRow .zoneDropdownItem {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #16384c;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.dashboardTopRow .zoneDropdownItem:hover {
+  background: #eaf2f7;
+}
+.dashboardTopRow .zoneDropdownItem.active {
+  background: #1f5f85;
+  color: #ffffff;
+}
+.dashboardTopRow .zoneDropdownEmpty {
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  color: #7a8d9a;
+}
+
+.gaugeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.gaugeCard {
+  padding: 24px 22px 20px;
+  border: 1px solid #d9e1e7;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
+}
+.gaugeCard .gaugeCardTop {
+  margin-bottom: 22px;
+}
+.gaugeCard .gaugeHeadingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gaugeCard .gaugeLabel {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #16384c;
+}
+.gaugeCard .gaugeStatus {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #5d7282;
+}
+.gaugeCard .gaugeVisualWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.gaugeCard .gaugeVisual {
+  --gaugePercent: 50%;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(closest-side, #ffffff 72%, transparent 73% 100%), conic-gradient(var(--gaugeColor) var(--gaugePercent), #e7eef3 0);
+}
+.gaugeCard .gaugeInner {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #eef3f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.gaugeCard .gaugeValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+.gaugeCard .gaugeValue {
+  font-size: 2.3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #16384c;
+}
+.gaugeCard .gaugeUnit {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5d7282;
+}
+.gaugeCard .gaugeRangeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.gaugeCard .gaugeRangeValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7a8d9a;
+}
+.gaugeCard .gaugeToneGood {
+  --gaugeColor: #2f9e44;
+}
+.gaugeCard .gaugeToneModerate {
+  --gaugeColor: #d98e04;
+}
+.gaugeCard .gaugeToneHigh {
+  --gaugeColor: #d94841;
+}
+.gaugeCard .gaugeToneCool {
+  --gaugeColor: #3b82f6;
+}/*# sourceMappingURL=styles.css.map */
