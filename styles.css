@@ -119,7 +119,7 @@
 }
 .loginPage .loginCard {
   width: 100%;
-  max-width: 460px;
+  width: 520px;
   padding: 2rem;
   background: #ffffff;
   border: 1px solid #d9e1e7;
@@ -149,6 +149,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
 }
 .loginPage .loginCard .loginForm .formGroup .formLabel {
   font-size: 0.95rem;
@@ -156,7 +157,7 @@
   color: #16384c;
 }
 .loginPage .loginCard .loginForm .formGroup .formInput {
-  width: 100%;
+  max-width: 100%;
   height: 48px;
   padding: 0 14px;
   border: 1px solid #cfdbe4;

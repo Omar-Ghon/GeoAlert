@@ -135,7 +135,7 @@
 
   .loginCard {
     width: 100%;
-    max-width: 460px;
+    width: 520px;
     padding: 2rem;
     background: #ffffff;
     border: 1px solid #d9e1e7;
@@ -166,7 +166,9 @@
       .formGroup {
         display: flex;
         flex-direction: column;
+        // margin: 0.5rem 1rem;
         gap: 8px;
+        width: 100%;
 
         .formLabel {
           font-size: 0.95rem;
@@ -175,7 +177,7 @@
         }
 
         .formInput {
-          width: 100%;
+          max-width: 100%;
           height: 48px;
           padding: 0 14px;
           border: 1px solid #cfdbe4;
