@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoAlert</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+</head>
+<body>
+
+<header class="siteHeader">
+  <div class="siteHeaderLeft">
+    <a href="#" class="siteHeaderLogo" aria-label="GeoAlert home">
+      <img src="/assets/icons/logo.png" alt="GeoAlert logo">
+    </a>
+  </div>
+
+  <div class="siteHeaderCenter">
+    <h1 class="siteHeaderTitle">GeoAlert</h1>
+  </div>
+
+  <div class="siteHeaderRight">
+    <a href="ui/alerts.html" class="siteHeaderButton siteHeaderButtonSecondary">Alerts</a>
+    <a href="ui/api/api.html" class="siteHeaderButton siteHeaderButtonSecondary">API</a>
+    <a href="ui/login.html" class="siteHeaderButton siteHeaderButtonPrimary">Login</a>
+  </div>
+</header>
+
+<main class="dashboardPage">
+  <section class="dashboardShell">
+    <div class="dashboardTopRow">
+      <div class="dashboardHeadingWrap">
+        <h2 class="dashboardHeading">Current Conditions</h2>
+
+        <div class="dashboardMetaRow">
+          <span class="dashboardMetaItem">
+            Current Zone:
+            <strong id="zoneName">Downtown Core</strong>
+          </span>
+          <span class="dashboardMetaDivider"></span>
+          <span class="dashboardMetaItem">
+            Last Updated:
+            <strong id="zoneUpdatedAt">10:48 AM</strong>
+          </span>
+        </div>
+      </div>
+
+  <div class="zoneSelectorWrap">
+    <label for="zoneSearchInput" class="zoneSelectorLabel">Zone</label>
+
+    <div class="zoneSelector" id="zoneSelector">
+      <input
+        type="text"
+        id="zoneSearchInput"
+        class="zoneSearchInput"
+        placeholder="Search zone..."
+        autocomplete="off"
+      >
+      <div class="zoneDropdown" id="zoneDropdown"></div>
+    </div>
+  </div>
+    </div>
+
+    <section class="gaugeGrid" id="gaugeGrid"></section>
+  </section>
+</main>
+
+<script type="module" src="/js/script.js"></script>
+<script type="module" src="/js/sensorData.js"></script>
+</body>
+</html>
