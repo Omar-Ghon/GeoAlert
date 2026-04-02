@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerts API Documentation - GeoAlert</title>
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="api.css">
+</head>
+<body>
+
+<header class="siteHeader">
+  <div class="siteHeaderLeft">
+    <a href="../../index.html" class="siteHeaderLogo" aria-label="GeoAlert home">
+      <img src="../../assets/icons/logo.png" alt="GeoAlert logo">
+    </a>
+  </div>
+
+  <div class="siteHeaderCenter">
+    <h1 class="siteHeaderTitle">GeoAlert API</h1>
+  </div>
+
+  <div class="siteHeaderRight">
+    <a href="api.html" class="siteHeaderButton siteHeaderButtonSecondary">Main API Docs</a>
+    <a href="../../ui/login.html" class="siteHeaderButton siteHeaderButtonPrimary">Login</a>
+  </div>
+</header>
+
+<main class="apiPage">
+  <div class="apiContainer">
+    <h1>Phone Alerts API Documentation</h1>
+    
+    <section class="apiSection">
+      <h2>Overview</h2>
+      <p>The Phone Alerts API allows you to send SMS notifications to users when sensor readings exceed configured thresholds. This is part of the GeoAlert system for real-time environmental monitoring.</p>
+    </section>
+
+    <section class="apiSection">
+      <h2>Authentication</h2>
+      <p>Include your API key in the request header:</p>
+      <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+    </section>
+
+    <section class="apiSection">
+      <h2>Endpoints</h2>
+
+      <div class="apiEndpoint">
+        <h3>POST /api/alerts/send-sms</h3>
+        <p class="apiDescription">Send an SMS alert to a user's phone number</p>
+
+        <div class="apiSubsection">
+          <h4>Request Body</h4>
+          <pre><code>{
+  "phoneNumber": "+1-555-123-4567",
+  "message": "[GeoAlert WARNING] Hamilton: Air Quality at 150AQI. Check dashboard for details.",
+  "priority": "high",
+  "timestamp": "2026-04-01T10:30:00Z"
+}</code></pre>
+
+          <table class="apiTable">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>phoneNumber</td>
+                <td>string</td>
+                <td>Yes</td>
+                <td>User's phone number in E.164 format or common formats</td>
+              </tr>
+              <tr>
+                <td>message</td>
+                <td>string</td>
+                <td>Yes</td>
+                <td>SMS message (max 160 characters recommended)</td>
+              </tr>
+              <tr>
+                <td>priority</td>
+                <td>string</td>
+                <td>No</td>
+                <td>Alert priority: 'critical' or 'high' (default: 'high')</td>
+              </tr>
+              <tr>
+                <td>timestamp</td>
+                <td>string</td>
+                <td>No</td>
+                <td>ISO 8601 timestamp of when alert was triggered</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="apiSubsection">
+          <h4>Response</h4>
+          <pre><code>{
+  "success": true,
+  "messageId": "msg_123456789",
+  "phoneNumber": "+1-555-123-4567",
+  "sentAt": "2026-04-01T10:30:00Z",
+  "status": "delivered"
+}</code></pre>
+
+          <table class="apiTable">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>success</td>
+                <td>boolean</td>
+                <td>Whether the SMS was sent successfully</td>
+              </tr>
+              <tr>
+                <td>messageId</td>
+                <td>string</td>
+                <td>Unique identifier for tracking the message</td>
+              </tr>
+              <tr>
+                <td>phoneNumber</td>
+                <td>string</td>
+                <td>The phone number the SMS was sent to</td>
+              </tr>
+              <tr>
+                <td>sentAt</td>
+                <td>string</td>
+                <td>ISO 8601 timestamp of when the SMS was sent</td>
+              </tr>
+              <tr>
+                <td>status</td>
+                <td>string</td>
+                <td>Delivery status: 'pending', 'delivered', 'failed'</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="apiSubsection">
+          <h4>Error Response</h4>
+          <pre><code>{
+  "success": false,
+  "error": "Invalid phone number format",
+  "code": "INVALID_PHONE"
+}</code></pre>
+
+          <table class="apiTable">
+            <thead>
+              <tr>
+                <th>Error Code</th>
+                <th>Status Code</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>INVALID_PHONE</td>
+                <td>400</td>
+                <td>Phone number format is invalid</td>
+              </tr>
+              <tr>
+                <td>MESSAGE_TOO_LONG</td>
+                <td>400</td>
+                <td>Message exceeds maximum length (320 characters)</td>
+              </tr>
+              <tr>
+                <td>QUOTA_EXCEEDED</td>
+                <td>429</td>
+                <td>Rate limit exceeded (max 100 SMS per hour)</td>
+              </tr>
+              <tr>
+                <td>SMS_SERVICE_ERROR</td>
+                <td>503</td>
+                <td>SMS provider is temporarily unavailable</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="apiEndpoint">
+        <h3>POST /api/alerts/configure</h3>
+        <p class="apiDescription">Configure alert thresholds for a user</p>
+
+        <div class="apiSubsection">
+          <h4>Request Body</h4>
+          <pre><code>{
+  "userId": "user_123",
+  "phoneNumber": "+1-555-123-4567",
+  "thresholds": {
+    "airQuality": {
+      "high": 150,
+      "critical": 180
+    },
+    "temperature": {
+      "high": 35,
+      "critical": 40,
+      "low": 0,
+      "critical_low": -5
+    },
+    "humidity": {
+      "high": 80,
+      "critical": 90,
+      "low": 20,
+      "critical_low": 10
+    },
+    "noiseLevel": {
+      "high": 90,
+      "critical": 110
+    }
+  },
+  "monitoredZones": ["hamilton", "scarborough"],
+  "enabled": true
+}</code></pre>
+        </div>
+
+        <div class="apiSubsection">
+          <h4>Response</h4>
+          <pre><code>{
+  "success": true,
+  "userId": "user_123",
+  "message": "Alert configuration updated",
+  "thresholdsApplied": {
+    "airQuality": { "high": 150, "critical": 180 },
+    "temperature": { "high": 35, "critical": 40, "low": 0, "critical_low": -5 },
+    "humidity": { "high": 80, "critical": 90, "low": 20, "critical_low": 10 },
+    "noiseLevel": { "high": 90, "critical": 110 }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="apiEndpoint">
+        <h3>GET /api/alerts/history</h3>
+        <p class="apiDescription">Retrieve alert history for a user</p>
+
+        <div class="apiSubsection">
+          <h4>Query Parameters</h4>
+          <table class="apiTable">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>userId</td>
+                <td>string</td>
+                <td>User ID (required)</td>
+              </tr>
+              <tr>
+                <td>limit</td>
+                <td>number</td>
+                <td>Max number of alerts to return (default: 50, max: 500)</td>
+              </tr>
+              <tr>
+                <td>startDate</td>
+                <td>string</td>
+                <td>ISO 8601 date to start from</td>
+              </tr>
+              <tr>
+                <td>endDate</td>
+                <td>string</td>
+                <td>ISO 8601 date to end at</td>
+              </tr>
+              <tr>
+                <td>zone</td>
+                <td>string</td>
+                <td>Filter by specific zone ID</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="apiSubsection">
+          <h4>Response</h4>
+          <pre><code>{
+  "success": true,
+  "alerts": [
+    {
+      "id": "alert_987654",
+      "timestamp": "2026-04-01T10:30:00Z",
+      "zone": "Hamilton",
+      "metric": "airQuality",
+      "value": 155,
+      "severity": "high",
+      "message": "[GeoAlert WARNING] Hamilton: Air Quality at 155AQI.",
+      "smsSent": true,
+      "smsDelivered": true
+    },
+    {
+      "id": "alert_987653",
+      "timestamp": "2026-04-01T09:15:00Z",
+      "zone": "Scarborough",
+      "metric": "noiseLevel",
+      "value": 95,
+      "severity": "critical",
+      "message": "[GeoAlert CRITICAL] Scarborough: Noise Level at 95dB.",
+      "smsSent": true,
+      "smsDelivered": true
+    }
+  ],
+  "total": 2,
+  "returned": 2
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="apiEndpoint">
+        <h3>POST /api/alerts/test</h3>
+        <p class="apiDescription">Send a test SMS alert to verify configuration</p>
+
+        <div class="apiSubsection">
+          <h4>Request Body</h4>
+          <pre><code>{
+  "phoneNumber": "+1-555-123-4567"
+}</code></pre>
+        </div>
+
+        <div class="apiSubsection">
+          <h4>Response</h4>
+          <pre><code>{
+  "success": true,
+  "message": "Test SMS sent successfully",
+  "phoneNumber": "+1-555-123-4567",
+  "messageId": "msg_test_123"
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="apiSection">
+      <h2>Usage Examples</h2>
+
+      <div class="apiExample">
+        <h3>JavaScript (Node.js)</h3>
+        <pre><code>const axios = require('axios');
+
+const sendAlert = async (phoneNumber, message) => {
+  try {
+    const response = await axios.post(
+      'https://api.geoalert.com/api/alerts/send-sms',
+      {
+        phoneNumber: phoneNumber,
+        message: message,
+        priority: 'high'
+      },
+      {
+        headers: {
+          'Authorization': 'Bearer YOUR_API_KEY',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    console.log('Alert sent:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending alert:', error.response.data);
+  }
+};
+
+// Send alert
+sendAlert('+1-555-123-4567', '[GeoAlert WARNING] Hamilton: Air Quality at 155AQI.');</code></pre>
+      </div>
+
+      <div class="apiExample">
+        <h3>Python</h3>
+        <pre><code>import requests
+import json
+
+def send_alert(phone_number, message):
+    url = 'https://api.geoalert.com/api/alerts/send-sms'
+    
+    headers = {
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    payload = {
+        'phoneNumber': phone_number,
+        'message': message,
+        'priority': 'high'
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        print('Alert sent:', response.json())
+    else:
+        print('Error:', response.json())
+    
+    return response.json()
+
+# Send alert
+send_alert('+1-555-123-4567', '[GeoAlert WARNING] Hamilton: Air Quality at 155AQI.')</code></pre>
+      </div>
+
+      <div class="apiExample">
+        <h3>cURL</h3>
+        <pre><code>curl -X POST https://api.geoalert.com/api/alerts/send-sms \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+1-555-123-4567",
+    "message": "[GeoAlert WARNING] Hamilton: Air Quality at 155AQI.",
+    "priority": "high"
+  }'</code></pre>
+      </div>
+    </section>
+
+    <section class="apiSection">
+      <h2>Rate Limits</h2>
+      <ul>
+        <li><strong>SMS Sending:</strong> 100 messages per hour per user</li>
+        <li><strong>Configuration:</strong> 10 requests per minute</li>
+        <li><strong>History Queries:</strong> 30 requests per minute</li>
+      </ul>
+      <p>Rate limit info is included in response headers: <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></p>
+    </section>
+
+    <section class="apiSection">
+      <h2>Best Practices</h2>
+      <ul>
+        <li>Always validate phone numbers before calling the API</li>
+        <li>Implement exponential backoff for retries</li>
+        <li>Cache alert configurations to reduce API calls</li>
+        <li>Monitor alert delivery rates and SMS costs</li>
+        <li>Keep messages under 160 characters to avoid multi-part SMS charges</li>
+        <li>Use priority levels to differentiate alert importance</li>
+        <li>Implement duplicate alert prevention (don't spam same alert)</li>
+      </ul>
+    </section>
+
+    <section class="apiSection">
+      <h2>Support</h2>
+      <p>For API support, contact: <strong>api-support@geoalert.com</strong></p>
+      <p>Documentation: <a href="https://docs.geoalert.com" target="_blank">https://docs.geoalert.com</a></p>
+    </section>
+  </div>
+</main>
+
+</body>
+</html>

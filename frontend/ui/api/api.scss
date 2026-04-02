@@ -10,27 +10,27 @@
   margin: 0 auto;
 }
 
-  .backButton {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px;
-    border: 1px solid #cfdbe4;
-    border-radius: 10px;
-    background: #ffffff;
-    color: #16384c;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: background 0.2s ease;
+.backButton {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid #cfdbe4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #16384c;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
 
-    &:hover {
-        background: #eaf2f7;
-    }
-    }
+  &:hover {
+    background: #eaf2f7;
+  }
+}
 
 .apiHero {
   display: flex;

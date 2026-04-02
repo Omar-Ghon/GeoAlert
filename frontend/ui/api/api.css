@@ -27,6 +27,7 @@
   font-weight: 600;
   transition: background 0.2s ease;
 }
+
 .backButton:hover {
   background: #eaf2f7;
 }
@@ -168,6 +169,7 @@
   background: #0f2230;
   overflow-x: auto;
 }
+
 .apiCodeBlock code,
 .apiCodeBlock pre {
   margin: 0;
@@ -231,8 +233,11 @@
   margin: 0;
   padding-left: 20px;
 }
+
 .apiBulletList li {
   margin-bottom: 10px;
   color: #5d7282;
   line-height: 1.6;
-}/*# sourceMappingURL=api.css.map */
+}
+
+/*# sourceMappingURL=api.css.map */
