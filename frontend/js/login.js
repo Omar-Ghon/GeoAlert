@@ -11,7 +11,7 @@ if (loginForm && usernameInput && passwordInput && loginError) {
     const password = passwordInput.value;
 
     const validLogins = [
-      { username: "opham", password: "opham123", redirect: "operator/operator.html" },
+      { username: "opham", password: "opham123", redirect: "../operator/operator.html" },
       { username: "admin", password: "admin123", redirect: "../admin.html" }
     ];
 
