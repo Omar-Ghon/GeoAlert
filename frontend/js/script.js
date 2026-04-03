@@ -1,4 +1,6 @@
 import { sensorZones } from "./sensorData.js";
+import { processZoneAlerts } from "./alertService.js";
+import { getUserSettings } from "./userManager.js";
 
 /* LOGIN PAGE */
 
@@ -148,6 +150,19 @@ function renderZoneData() {
   zoneName.textContent = selectedZone.zoneName;
   zoneUpdatedAt.textContent = selectedZone.updatedAt;
 
+  // Check for alerts on this zone
+  const userSettings = getUserSettings();
+  if (userSettings && userSettings.alertsEnabled) {
+    processZoneAlerts(selectedZone, {
+      phoneNumber: userSettings.phoneNumber,
+      enabled: userSettings.alertsEnabled,
+      customThresholds: userSettings.customThresholds,
+      notificationsPreference: userSettings.notificationsPreference
+    }).catch(error => {
+      console.error("Error processing zone alerts:", error);
+    });
+  }
+
   gaugeGrid.innerHTML = "";
 
   selectedZone.gauges.forEach((gauge) => {
@@ -230,5 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
         closeZoneDropdown();
       }
     });
+
+    // Set up periodic alert checking every 5 minutes
+    setInterval(() => {
+      renderZoneData();
+    }, 5 * 60 * 1000);
   }
 });
