@@ -11,17 +11,17 @@ if (loginForm && usernameInput && passwordInput && loginError) {
     const password = passwordInput.value;
 
     const validLogins = [
-      { username: "operator", password: "op123" },
-      { username: "admin", password: "admin123" }
+      { username: "opham", password: "opham123", redirect: "operator/operator.html" },
+      { username: "admin", password: "admin123", redirect: "../admin.html" }
     ];
 
-    const isValidLogin = validLogins.some(function (login) {
+    const matchedLogin = validLogins.find(function (login) {
       return login.username === username && login.password === password;
     });
 
-    if (isValidLogin) {
+    if (matchedLogin) {
       loginError.classList.remove("show");
-      window.location.href = "../index.html";
+      window.location.href = matchedLogin.redirect;
     } else {
       loginError.classList.add("show");
     }
