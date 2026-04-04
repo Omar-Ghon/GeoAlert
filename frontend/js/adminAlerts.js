@@ -1,65 +1,62 @@
-import { hamiltonOperatorData } from "./operatorSensorData.js";
+import { adminCityData } from "./operatorSensorData.js";
 
 const RULES_STORAGE_KEY = "geoAlertAdminRules";
 const AUDIT_STORAGE_KEY = "geoAlertAdminAudit";
 const TRIGGERED_STORAGE_KEY = "geoAlertTriggeredAlerts";
 
 export const metricConfig = {
-  airQuality: {
-    label: "Air Quality",
-    unit: "AQI"
-  },
-  temperature: {
-    label: "Temperature",
-    unit: "°C"
-  },
-  humidity: {
-    label: "Humidity",
-    unit: "%"
-  },
-  noiseLevel: {
-    label: "Noise Level",
-    unit: "dB"
-  }
+  airQuality: { label: "Air Quality", unit: "AQI" },
+  temperature: { label: "Temperature", unit: "°C" },
+  humidity: { label: "Humidity", unit: "%" },
+  noiseLevel: { label: "Noise Level", unit: "dB" }
 };
+
+const severityOrder = ["mild", "moderate", "severe"];
 
 const defaultRules = [
   {
     id: "rule-001",
-    ruleName: "Central Hamilton AQI Warning",
+    ruleName: "Central Hamilton Air Quality Alert",
     zoneId: "central-hamilton",
     metric: "airQuality",
     evaluationType: "zoneAverage",
     comparison: "greaterThan",
-    threshold: 90,
     window: "fiveMinuteAverage",
-    severity: "warning",
-    alertMessage: "Central Hamilton air quality has moved above the warning threshold and should be watched closely.",
-    enabled: true,
-    createdAt: "2026-04-03T12:00:00"
-  },
-  {
-    id: "rule-002",
-    ruleName: "Stoney Creek Noise Critical",
-    zoneId: "stoney-creek",
-    metric: "noiseLevel",
-    evaluationType: "singleSensor",
-    comparison: "greaterThan",
-    threshold: 80,
-    window: "latest",
-    severity: "critical",
-    alertMessage: "A Stoney Creek noise sensor has exceeded the critical threshold and may require immediate operator attention.",
-    enabled: true,
-    createdAt: "2026-04-03T12:02:00"
+    levels: [
+      {
+        id: "mild",
+        label: "Mild",
+        threshold: 85,
+        message: "Air quality is mildly elevated in Central Hamilton."
+      },
+      {
+        id: "moderate",
+        label: "Moderate",
+        threshold: 90,
+        message: "Air quality is moderately elevated in Central Hamilton."
+      },
+      {
+        id: "severe",
+        label: "Severe",
+        threshold: 100,
+        message: "Air quality is severely elevated in Central Hamilton."
+      }
+    ],
+    createdAt: "2026-04-03T12:00:00",
+    updatedAt: "2026-04-03T12:00:00"
   }
 ];
 
-export function getCityData() {
-  return hamiltonOperatorData;
+export function getAdminCities() {
+  return adminCityData;
 }
 
-export function getZones() {
-  return hamiltonOperatorData.zones ?? [];
+export function getCityData(cityId = "hamilton") {
+  return adminCityData.find((city) => city.cityId === cityId) ?? hamiltonOperatorData;
+}
+
+export function getZones(cityId = "hamilton") {
+  return getCityData(cityId).zones ?? [];
 }
 
 export function getMetrics() {
@@ -91,21 +88,27 @@ export function getRules() {
   return readJson(RULES_STORAGE_KEY, defaultRules);
 }
 
+export function getRuleById(ruleId) {
+  return getRules().find((rule) => rule.id === ruleId) ?? null;
+}
+
 export function createRule(ruleInput) {
-  const newRule = {
-    id: buildId("rule"),
-    ruleName: ruleInput.ruleName.trim(),
-    zoneId: ruleInput.zoneId,
-    metric: ruleInput.metric,
-    evaluationType: ruleInput.evaluationType,
-    comparison: ruleInput.comparison,
-    threshold: Number(ruleInput.threshold),
-    window: ruleInput.window,
-    severity: ruleInput.severity,
-    alertMessage: ruleInput.alertMessage.trim(),
-    enabled: true,
-    createdAt: new Date().toISOString()
-  };
+const selectedCity = getCityData(ruleInput.cityId);
+
+const newRule = {
+  id: buildId("rule"),
+  ruleName: ruleInput.ruleName.trim(),
+  cityId: ruleInput.cityId,
+  cityName: selectedCity.cityName,
+  zoneId: ruleInput.zoneId,
+  metric: ruleInput.metric,
+  evaluationType: ruleInput.evaluationType,
+  comparison: ruleInput.comparison,
+  window: ruleInput.window,
+  levels: normalizeLevels(ruleInput.levels),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
 
   const rules = getRules();
   rules.unshift(newRule);
@@ -113,10 +116,47 @@ export function createRule(ruleInput) {
 
   addAuditEntry(
     "Created alert rule",
-    `${newRule.ruleName} was created for ${getZoneName(newRule.zoneId)} ${metricConfig[newRule.metric].label.toLowerCase()}.`
+    `${newRule.ruleName} was created with ${newRule.levels.length} configured alert level(s).`
   );
 
   return newRule;
+}
+
+export function updateRule(ruleId, ruleInput) {
+  const rules = getRules();
+  const updatedRules = rules.map((rule) => {
+    if (rule.id !== ruleId) {
+      return rule;
+    }
+
+    const selectedCity = getCityData(ruleInput.cityId);
+
+    return {
+    ...rule,
+    ruleName: ruleInput.ruleName.trim(),
+    cityId: ruleInput.cityId,
+    cityName: selectedCity.cityName,
+    zoneId: ruleInput.zoneId,
+    metric: ruleInput.metric,
+    evaluationType: ruleInput.evaluationType,
+    comparison: ruleInput.comparison,
+    window: ruleInput.window,
+    levels: normalizeLevels(ruleInput.levels),
+    updatedAt: new Date().toISOString()
+    };
+  });
+
+  writeJson(RULES_STORAGE_KEY, updatedRules);
+
+  const updatedRule = updatedRules.find((rule) => rule.id === ruleId);
+  if (updatedRule) {
+    addAuditEntry(
+      "Updated alert rule",
+      `${updatedRule.ruleName} was edited by the administrator.`
+    );
+  }
+
+  return updatedRule;
 }
 
 export function deleteRule(ruleId) {
@@ -127,33 +167,7 @@ export function deleteRule(ruleId) {
   writeJson(RULES_STORAGE_KEY, updatedRules);
 
   if (ruleToDelete) {
-    addAuditEntry(
-      "Deleted alert rule",
-      `${ruleToDelete.ruleName} was deleted by the administrator.`
-    );
-  }
-}
-
-export function toggleRuleEnabled(ruleId) {
-  const rules = getRules();
-  const updatedRules = rules.map((rule) => {
-    if (rule.id === ruleId) {
-      return {
-        ...rule,
-        enabled: !rule.enabled
-      };
-    }
-    return rule;
-  });
-
-  writeJson(RULES_STORAGE_KEY, updatedRules);
-
-  const changedRule = updatedRules.find((rule) => rule.id === ruleId);
-  if (changedRule) {
-    addAuditEntry(
-      changedRule.enabled ? "Enabled alert rule" : "Disabled alert rule",
-      `${changedRule.ruleName} is now ${changedRule.enabled ? "enabled" : "disabled"}.`
-    );
+    addAuditEntry("Deleted alert rule", `${ruleToDelete.ruleName} was deleted by the administrator.`);
   }
 }
 
@@ -177,27 +191,80 @@ export function getTriggeredAlerts() {
   return readJson(TRIGGERED_STORAGE_KEY, []);
 }
 
+export function getRuleStats(cityId = "hamilton") {
+  const cityData = getCityData(cityId);
+  const rules = getRules().filter((rule) => (rule.cityId || "hamilton") === cityId);
+  const triggeredAlerts = getTriggeredAlerts().filter((alert) => {
+    const rule = getRuleById(alert.ruleId);
+    return (rule?.cityId || "hamilton") === cityId;
+  }).length;
+
+  return {
+    cityName: cityData.cityName,
+    zoneCount: cityData.zones?.length ?? 0,
+    activeRules: rules.length,
+    triggeredAlerts
+  };
+}
+
+export function getZoneName(zoneId, cityId = "hamilton") {
+  if (zoneId === "all-zones") {
+    return "All Zones";
+  }
+
+  const zone = getZones(cityId).find((item) => item.id === zoneId);
+  return zone ? zone.zoneName : zoneId;
+}
+
+export function formatRuleEvaluation(rule) {
+  const evaluationLabel = rule.evaluationType === "zoneAverage" ? "Zone Average" : "Single Sensor";
+  const windowLabel = rule.window === "fiveMinuteAverage" ? "5-min avg" : "Latest";
+  return `${evaluationLabel}<br>(${windowLabel})`;
+}
+
+export function formatLevelsSummary(rule) {
+  if (!rule.levels?.length) {
+    return "No levels configured";
+  }
+
+  return rule.levels
+    .map((level) => `${level.label}: ${rule.comparison === "greaterThan" ? ">" : "<"} ${level.threshold}`)
+    .join("<br>");
+}
+
 export function evaluateRulesAgainstCurrentData() {
-  const rules = getRules().filter((rule) => rule.enabled);
+  const rules = getRules();
   const triggeredAlerts = [];
 
   for (const rule of rules) {
-    const evaluation = evaluateSingleRule(rule, hamiltonOperatorData);
+    const cityData = getCityData(rule.cityId);
 
-    if (evaluation.triggered) {
+    if (!cityData.sensors && cityData.cityId !== "hamilton" && cityData.zones.every((zone) => !zone.sensors.length)) {
+    continue;
+    }
+
+    const reading = getRuleReading(rule, cityData);
+    if (reading === null) {
+      continue;
+    }
+
+    const triggeredLevel = getTriggeredLevel(rule, reading);
+
+    if (triggeredLevel) {
       triggeredAlerts.push({
         id: buildId("alert"),
         ruleId: rule.id,
         ruleName: rule.ruleName,
         zoneId: rule.zoneId,
-        zoneName: getZoneName(rule.zoneId),
+        zoneName: getZoneName(rule.zoneId, rule.cityId),
         metric: rule.metric,
         metricLabel: metricConfig[rule.metric].label,
-        severity: rule.severity,
-        reading: evaluation.reading,
+        severity: triggeredLevel.id,
+        severityLabel: triggeredLevel.label,
+        reading: Number(reading.toFixed(2)),
         unit: metricConfig[rule.metric].unit,
         status: "active",
-        message: rule.alertMessage,
+        message: triggeredLevel.message,
         triggeredAt: new Date().toISOString(),
         evaluationType: rule.evaluationType
       });
@@ -208,50 +275,31 @@ export function evaluateRulesAgainstCurrentData() {
 
   addAuditEntry(
     "Ran alert evaluation",
-    `${rules.length} active rule${rules.length === 1 ? "" : "s"} evaluated against the current Hamilton dataset.`
+    `${rules.length} rule${rules.length === 1 ? "" : "s"} evaluated against the current Hamilton dataset.`
   );
 
   return triggeredAlerts;
 }
 
-export function getRuleStats() {
-  const rules = getRules();
-  const activeRules = rules.filter((rule) => rule.enabled).length;
-  const triggeredAlerts = getTriggeredAlerts().length;
-
-  return {
-    cityName: hamiltonOperatorData.cityName,
-    zoneCount: getZones().length,
-    activeRules,
-    triggeredAlerts
-  };
+function normalizeLevels(levels) {
+  return levels
+    .filter((level) => level.enabled)
+    .map((level) => ({
+      id: level.id,
+      label: (level.label || capitalize(level.id)).trim(),
+      threshold: Number(level.threshold),
+      message: level.message.trim()
+    }))
+    .sort((a, b) => severityOrder.indexOf(a.id) - severityOrder.indexOf(b.id));
 }
 
-export function getZoneName(zoneId) {
-  if (zoneId === "all-zones") {
-    return "All Zones";
-  }
-
-  const zone = getZones().find((item) => item.id === zoneId);
-  return zone ? zone.zoneName : zoneId;
-}
-
-export function formatRuleEvaluation(rule) {
-  const evaluationLabel = rule.evaluationType === "zoneAverage" ? "Zone Average" : "Single Sensor";
-  const comparisonLabel = rule.comparison === "greaterThan" ? ">" : "<";
-  const windowLabel = rule.window === "fiveMinuteAverage" ? "5-min avg" : "latest";
-  const unit = metricConfig[rule.metric]?.unit ?? "";
-
-  return `${evaluationLabel} (${windowLabel}) ${comparisonLabel} ${rule.threshold} ${unit}`.trim();
-}
-
-function evaluateSingleRule(rule, cityData) {
+function getRuleReading(rule, cityData) {
   const matchingZones = rule.zoneId === "all-zones"
     ? cityData.zones
     : cityData.zones.filter((zone) => zone.id === rule.zoneId);
 
   if (matchingZones.length === 0) {
-    return { triggered: false, reading: null };
+    return null;
   }
 
   let readings = [];
@@ -260,8 +308,11 @@ function evaluateSingleRule(rule, cityData) {
     const metricSensors = zone.sensors.filter((sensor) => sensor.sensorType === rule.metric);
 
     if (rule.evaluationType === "singleSensor") {
-      const sensorValues = metricSensors.map((sensor) => getSensorWindowValue(sensor, rule.window));
-      readings.push(...sensorValues.filter((value) => Number.isFinite(value)));
+      const sensorValues = metricSensors
+        .map((sensor) => getSensorWindowValue(sensor, rule.window))
+        .filter((value) => Number.isFinite(value));
+
+      readings.push(...sensorValues);
     } else {
       const zoneSensorValues = metricSensors
         .map((sensor) => getSensorWindowValue(sensor, rule.window))
@@ -273,25 +324,33 @@ function evaluateSingleRule(rule, cityData) {
     }
   }
 
-  if (readings.length === 0) {
-    return { triggered: false, reading: null };
+  if (!readings.length) {
+    return null;
   }
 
-  const reading = rule.evaluationType === "singleSensor"
+  return rule.evaluationType === "singleSensor"
     ? (rule.comparison === "greaterThan" ? Math.max(...readings) : Math.min(...readings))
     : average(readings);
+}
 
-  const triggered = compareReading(reading, rule.comparison, rule.threshold);
+function getTriggeredLevel(rule, reading) {
+  const matchedLevels = (rule.levels ?? []).filter((level) =>
+    rule.comparison === "greaterThan"
+      ? reading > level.threshold
+      : reading < level.threshold
+  );
 
-  return {
-    triggered,
-    reading: Number(reading.toFixed(2))
-  };
+  if (!matchedLevels.length) {
+    return null;
+  }
+
+  matchedLevels.sort((a, b) => severityOrder.indexOf(b.id) - severityOrder.indexOf(a.id));
+  return matchedLevels[0];
 }
 
 function getSensorWindowValue(sensor, window) {
   const readings = sensor.readings ?? [];
-  if (readings.length === 0) {
+  if (!readings.length) {
     return null;
   }
 
@@ -302,19 +361,7 @@ function getSensorWindowValue(sensor, window) {
   return average(readings.map((reading) => reading.value));
 }
 
-function compareReading(reading, comparison, threshold) {
-  if (comparison === "lessThan") {
-    return reading < threshold;
-  }
-
-  return reading > threshold;
-}
-
 function average(values) {
-  if (!values.length) {
-    return 0;
-  }
-
   const total = values.reduce((sum, value) => sum + value, 0);
   return total / values.length;
 }
@@ -334,4 +381,8 @@ function readJson(key, fallback) {
 
 function writeJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+function capitalize(value) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
