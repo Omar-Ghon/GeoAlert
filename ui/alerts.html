@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Settings - GeoAlert</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .alertsPage {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .alertsSection {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    .alertsSectionTitle {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .formGroup {
+      margin-bottom: 1.5rem;
+    }
+
+    .formLabel {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .formInput,
+    .formSelect {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .formInput:focus,
+    .formSelect:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .phoneInputGroup {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .phoneInputGroup .formInput {
+      flex: 1;
+    }
+
+    .verifyButton {
+      padding: 0.75rem 1rem;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .verifyButton:hover {
+      background: #0b7dda;
+    }
+
+    .verifyButton:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .toggleSwitch {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .thresholdGrid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .thresholdItem {
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 1rem;
+      background: #f9f9f9;
+    }
+
+    .thresholdMetricName {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #333;
+    }
+
+    .thresholdInputGroup {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .zoneChecklist {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .zoneChecklistItem {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      background: white;
+    }
+
+    .zoneChecklistItem input[type="checkbox"] {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .zoneChecklistLabel {
+      cursor: pointer;
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .buttonGroup {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .saveButton {
+      padding: 0.75rem 2rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .saveButton:hover {
+      background: #45a049;
+    }
+
+    .resetButton {
+      padding: 0.75rem 2rem;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .resetButton:hover {
+      background: #da190b;
+    }
+
+    .alertMessage {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .alertMessage.show {
+      display: block;
+    }
+
+    .alertMessage.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .alertMessage.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .statusBadge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .statusBadge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .statusBadge.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .helpText {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<header class="siteHeader">
+  <div class="siteHeaderLeft">
+    <a href="../index.html" class="siteHeaderLogo" aria-label="GeoAlert home">
+      <img src="../assets/icons/logo.png" alt="GeoAlert logo">
+    </a>
+  </div>
+
+  <div class="siteHeaderCenter">
+    <h1 class="siteHeaderTitle">GeoAlert</h1>
+  </div>
+
+  <div class="siteHeaderRight">
+    <a href="../index.html" class="siteHeaderButton siteHeaderButtonSecondary">Dashboard</a>
+    <a href="../ui/login.html" class="siteHeaderButton siteHeaderButtonPrimary">Login</a>
+  </div>
+</header>
+
+<main class="alertsPage">
+  <div id="alertMessage" class="alertMessage"></div>
+
+  <!-- Phone Number Section -->
+  <section class="alertsSection">
+    <h2 class="alertsSectionTitle">
+      Phone Alert Settings
+      <span id="alertStatus" class="statusBadge inactive">Alerts Inactive</span>
+    </h2>
+
+    <div class="formGroup">
+      <label for="phoneNumber" class="formLabel">Phone Number</label>
+      <div class="phoneInputGroup">
+        <input
+          type="tel"
+          id="phoneNumber"
+          class="formInput"
+          placeholder="(555) 123-4567"
+          aria-label="Phone number for alerts"
+        >
+        <button class="verifyButton" id="verifyPhoneBtn">Verify</button>
+      </div>
+      <div class="helpText">
+        Your phone number will be used to send SMS alerts when sensors exceed configured thresholds.
+      </div>
+    </div>
+
+    <div class="formGroup toggleSwitch">
+      <label for="alertsEnabledToggle" class="formLabel" style="margin: 0;">Enable Alerts</label>
+      <label class="switch">
+        <input type="checkbox" id="alertsEnabledToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="formGroup">
+      <label for="notificationPreference" class="formLabel">Notification Level</label>
+      <select id="notificationPreference" class="formSelect">
+        <option value="all">All Alerts (High & Critical)</option>
+        <option value="critical">Critical Only</option>
+        <option value="none">Disabled</option>
+      </select>
+      <div class="helpText">
+        Control which severity levels trigger SMS notifications.
+      </div>
+    </div>
+  </section>
+
+  <!-- Monitored Zones Section -->
+  <section class="alertsSection">
+    <h2 class="alertsSectionTitle">Monitored Zones</h2>
+    <div class="formGroup">
+      <label class="formLabel">Select which zones to monitor:</label>
+      <div id="zoneChecklist" class="zoneChecklist"></div>
+      <div class="helpText">
+        Only alerts from selected zones will be sent to your phone.
+      </div>
+    </div>
+  </section>
+
+  <!-- Alert Thresholds Section -->
+  <section class="alertsSection">
+    <h2 class="alertsSectionTitle">Alert Thresholds</h2>
+    <div class="thresholdGrid" id="thresholdGrid"></div>
+    <div class="helpText" style="margin-top: 1rem;">
+      Adjust thresholds to customize when you receive alerts. When sensor values exceed these limits, an SMS will be sent to your phone.
+    </div>
+  </section>
+
+  <!-- Alert History Section -->
+  <section class="alertsSection">
+    <h2 class="alertsSectionTitle">Recent Alerts</h2>
+    <div id="alertHistory" style="max-height: 300px; overflow-y: auto;"></div>
+    <div class="helpText" style="margin-top: 1rem;">
+      Shows the last 10 alerts triggered (if any).
+    </div>
+  </section>
+
+  <!-- Action Buttons -->
+  <section class="alertsSection">
+    <div class="buttonGroup">
+      <button class="saveButton" id="saveSettingsBtn">Save Settings</button>
+      <button class="resetButton" id="resetSettingsBtn">Reset to Defaults</button>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { sensorZones } from '../sensorData.js';
+  import * as userManager from '../userManager.js';
+  import { defaultAlertThresholds, getAlertHistory } from '../alertService.js';
+
+  // ============== UI Elements ==============
+  const phoneNumberInput = document.getElementById('phoneNumber');
+  const verifyButton = document.getElementById('verifyPhoneBtn');
+  const alertsEnabledToggle = document.getElementById('alertsEnabledToggle');
+  const notificationPreference = document.getElementById('notificationPreference');
+  const zoneChecklist = document.getElementById('zoneChecklist');
+  const thresholdGrid = document.getElementById('thresholdGrid');
+  const alertHistory = document.getElementById('alertHistory');
+  const saveButton = document.getElementById('saveSettingsBtn');
+  const resetButton = document.getElementById('resetSettingsBtn');
+  const alertMessage = document.getElementById('alertMessage');
+  const alertStatus = document.getElementById('alertStatus');
+
+  // ============== Load Current Settings ==============
+  function loadSettings() {
+    const settings = userManager.getUserSettings();
+
+    // Load phone number (or use test number if empty)
+    const phoneNumber = settings.phoneNumber || '647-746-9747';
+    phoneNumberInput.value = phoneNumber;
+    
+    // Auto-save the test phone number if not already set
+    if (!settings.phoneNumber) {
+      userManager.setPhoneNumber(phoneNumber);
+    }
+
+    // Load alerts enabled state (default to true for testing)
+    alertsEnabledToggle.checked = settings.alertsEnabled !== false;
+    userManager.setAlertsEnabled(alertsEnabledToggle.checked);
+    updateAlertStatus();
+
+    // Load notification preference
+    notificationPreference.value = settings.notificationsPreference || 'all';
+
+    // Load monitored zones (default to Hamilton for testing)
+    let monitoredZones = settings.monitoredZones;
+    if (monitoredZones.length === 0) {
+      monitoredZones = ['hamilton'];
+      userManager.addMonitoredZone('hamilton');
+    }
+    renderZoneChecklist(monitoredZones);
+
+    // Load thresholds
+    renderThresholds(settings.customThresholds);
+
+    // Load alert history
+    renderAlertHistory();
+    
+    // Show info message
+    showMessage('🚀 Alert system ready! Phone: ' + phoneNumber + ' | Zone: Hamilton selected', 'success');
+  }
+
+  function updateAlertStatus() {
+    const isEnabled = alertsEnabledToggle.checked && userManager.isPhoneConfigured();
+    alertStatus.textContent = isEnabled ? 'Alerts Active' : 'Alerts Inactive';
+    alertStatus.classList.toggle('active', isEnabled);
+    alertStatus.classList.toggle('inactive', !isEnabled);
+  }
+
+  // ============== Zone Checklist ==============
+  function renderZoneChecklist(monitoredZones) {
+    zoneChecklist.innerHTML = '';
+
+    sensorZones.forEach(zone => {
+      const isChecked = monitoredZones.includes(zone.id);
+
+      const item = document.createElement('div');
+      item.className = 'zoneChecklistItem';
+
+      item.innerHTML = `
+        <input
+          type="checkbox"
+          id="zone-${zone.id}"
+          value="${zone.id}"
+          ${isChecked ? 'checked' : ''}
+        >
+        <label for="zone-${zone.id}" class="zoneChecklistLabel">${zone.zoneName}</label>
+      `;
+
+      zoneChecklist.appendChild(item);
+
+      item.querySelector('input').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          userManager.addMonitoredZone(zone.id);
+        } else {
+          userManager.removeMonitoredZone(zone.id);
+        }
+      });
+    });
+  }
+
+  // ============== Thresholds ==============
+  function renderThresholds(customThresholds) {
+    thresholdGrid.innerHTML = '';
+
+    Object.entries(defaultAlertThresholds).forEach(([metricId, defaults]) => {
+      const current = customThresholds[metricId] || defaults;
+      const metricLabel = getMetricLabel(metricId);
+
+      const item = document.createElement('div');
+      item.className = 'thresholdItem';
+
+      let inputs = '';
+      if (current.critical) {
+        inputs += `
+          <div class="formGroup">
+            <label class="formLabel">Critical Alert (≥)</label>
+            <input type="number" class="formInput threshold-input" data-metric="${metricId}" data-type="critical" value="${current.critical}" step="1">
+          </div>
+        `;
+      }
+      if (current.high) {
+        inputs += `
+          <div class="formGroup">
+            <label class="formLabel">High Alert (≥)</label>
+            <input type="number" class="formInput threshold-input" data-metric="${metricId}" data-type="high" value="${current.high}" step="1">
+          </div>
+        `;
+      }
+      if (current.critical_low) {
+        inputs += `
+          <div class="formGroup">
+            <label class="formLabel">Critical Low (≤)</label>
+            <input type="number" class="formInput threshold-input" data-metric="${metricId}" data-type="critical_low" value="${current.critical_low}" step="1">
+          </div>
+        `;
+      }
+      if (current.low) {
+        inputs += `
+          <div class="formGroup">
+            <label class="formLabel">Low Alert (≤)</label>
+            <input type="number" class="formInput threshold-input" data-metric="${metricId}" data-type="low" value="${current.low}" step="1">
+          </div>
+        `;
+      }
+
+      item.innerHTML = `<div class="thresholdMetricName">${metricLabel}</div>${inputs}`;
+      thresholdGrid.appendChild(item);
+    });
+
+    // Add event listeners to threshold inputs
+    document.querySelectorAll('.threshold-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const metricId = e.target.dataset.metric;
+        const thresholdType = e.target.dataset.type;
+        const value = parseFloat(e.target.value);
+
+        userManager.setAlertThreshold(metricId, thresholdType, value);
+      });
+    });
+  }
+
+  // ============== Alert History ==============
+  function renderAlertHistory() {
+    const history = getAlertHistory().slice(-10).reverse();
+
+    if (history.length === 0) {
+      alertHistory.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No alerts yet</p>';
+      return;
+    }
+
+    alertHistory.innerHTML = history.map(alert => `
+      <div style="padding: 0.75rem; border-bottom: 1px solid #e0e0e0;">
+        <div style="font-weight: 500;">${alert.zone} - ${getMetricLabel(alert.metric)}</div>
+        <div style="font-size: 0.85rem; color: #666;">
+          Value: ${alert.value} | Severity: <strong>${alert.severity.toUpperCase()}</strong>
+        </div>
+        <div style="font-size: 0.8rem; color: #999;">
+          ${new Date(alert.timestamp).toLocaleString()}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ============== Event Listeners ==============
+  verifyButton.addEventListener('click', () => {
+    try {
+      const phone = phoneNumberInput.value;
+      if (!userManager.validatePhoneNumber(phone)) {
+        showMessage('Invalid phone number format', 'error');
+        return;
+      }
+
+      userManager.setPhoneNumber(phone);
+      showMessage('Phone number verified and saved!', 'success');
+      updateAlertStatus();
+    } catch (error) {
+      showMessage(error.message, 'error');
+    }
+  });
+
+  alertsEnabledToggle.addEventListener('change', () => {
+    userManager.setAlertsEnabled(alertsEnabledToggle.checked);
+    updateAlertStatus();
+  });
+
+  notificationPreference.addEventListener('change', () => {
+    userManager.setNotificationPreference(notificationPreference.value);
+  });
+
+  saveButton.addEventListener('click', () => {
+    try {
+      const phone = phoneNumberInput.value;
+      if (phone && !userManager.validatePhoneNumber(phone)) {
+        throw new Error('Invalid phone number format');
+      }
+      showMessage('Settings saved successfully!', 'success');
+    } catch (error) {
+      showMessage(error.message, 'error');
+    }
+  });
+
+  resetButton.addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset all settings to defaults?')) {
+      userManager.resetSettings();
+      loadSettings();
+      showMessage('Settings reset to defaults', 'success');
+    }
+  });
+
+  // ============== Helper Functions ==============
+  function showMessage(message, type) {
+    alertMessage.textContent = message;
+    alertMessage.className = `alertMessage show ${type}`;
+    setTimeout(() => {
+      alertMessage.classList.remove('show');
+    }, 4000);
+  }
+
+  function getMetricLabel(metricId) {
+    const labels = {
+      airQuality: 'Air Quality (AQI)',
+      temperature: 'Temperature (°C)',
+      humidity: 'Humidity (%)',
+      noiseLevel: 'Noise Level (dB)'
+    };
+    return labels[metricId] || metricId;
+  }
+
+  // ============== Initialize ==============
+  loadSettings();
+</script>
+
+</body>
+</html>

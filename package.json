@@ -1,0 +1,25 @@
+{
+  "name": "geoalert-sms-server",
+  "version": "1.0.0",
+  "description": "GeoAlert SMS alert server with Twilio integration",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
+  },
+  "keywords": [
+    "geoalert",
+    "sms",
+    "twilio",
+    "alerts"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.0.3",
+    "twilio": "^4.0.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}
