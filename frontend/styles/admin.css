@@ -1,0 +1,524 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+  color: #16384c;
+}
+
+.siteHeader.adminHeader {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  max-width: 100%;
+  height: 88px;
+  padding: 0 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #d9e1e7;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.siteHeader.adminHeader .siteHeaderLeft,
+.siteHeader.adminHeader .siteHeaderCenter,
+.siteHeader.adminHeader .siteHeaderRight {
+  display: flex;
+  align-items: center;
+}
+.siteHeader.adminHeader .siteHeaderLeft {
+  flex: 1;
+  justify-content: flex-start;
+}
+.siteHeader.adminHeader .siteHeaderCenter {
+  flex: 1;
+  justify-content: center;
+}
+.siteHeader.adminHeader .siteHeaderRight {
+  flex: 1;
+  justify-content: flex-end;
+}
+.siteHeader.adminHeader .siteHeaderLogo {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f4f8fb;
+  border: 1px solid #d9e1e7;
+  text-decoration: none;
+  overflow: hidden;
+}
+.siteHeader.adminHeader .siteHeaderLogo img {
+  width: 30px;
+  height: 30px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  display: block;
+}
+.siteHeader.adminHeader .siteHeaderTitle {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #16384c;
+  line-height: 1;
+}
+.siteHeader.adminHeader .accountMenu {
+  position: relative;
+}
+.siteHeader.adminHeader .accountMenuButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 170px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: #f4f8fb;
+  color: #16384c;
+  border: 1px solid #cfdbe4;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.siteHeader.adminHeader .accountMenuButton:hover {
+  background: #eaf2f7;
+}
+.siteHeader.adminHeader .accountMenuUsername {
+  text-transform: none;
+}
+.siteHeader.adminHeader .accountMenuChevron {
+  font-size: 1.1rem;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+.siteHeader.adminHeader .accountDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 170px;
+  padding: 0.45rem;
+  border: 1px solid #d9e1e7;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(22, 56, 76, 0.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+.siteHeader.adminHeader .accountDropdown.isOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.siteHeader.adminHeader .accountDropdownItem {
+  display: block;
+  padding: 0.8rem 0.9rem;
+  border-radius: 10px;
+  color: #16384c;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+.siteHeader.adminHeader .accountDropdownItem:hover {
+  background: #eaf2f7;
+  color: #1f5f85;
+}
+
+.adminPage {
+  min-height: calc(100vh - 88px);
+  padding: 2rem 1.5rem 3rem;
+  background: #f5f7fb;
+}
+
+.adminShell {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.adminTopBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.adminHeadingWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.adminHeading {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.adminSubheading {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #5f6f7c;
+}
+
+.adminTopBarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.smallButton {
+  border: 0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.primaryButton {
+  min-width: 170px;
+  height: 44px;
+  padding: 0 20px;
+  background: #1f5f85;
+  color: #ffffff;
+}
+.primaryButton:hover {
+  background: #184b69;
+}
+
+.secondaryButton {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 18px;
+  background: #f4f8fb;
+  color: #16384c;
+  border: 1px solid #d9e1e7;
+}
+.secondaryButton:hover {
+  background: #eaf2f7;
+}
+
+.smallButton {
+  min-width: 92px;
+  height: 34px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+  background: #f4f8fb;
+  color: #16384c;
+  border: 1px solid #d9e1e7;
+}
+.smallButton:hover {
+  background: #eaf2f7;
+}
+.smallButton.danger {
+  background: #fff1f0;
+  color: #a43c32;
+  border-color: #efc7c2;
+}
+.smallButton.success {
+  background: #eef8f1;
+  color: #2d6a42;
+  border-color: #cfe5d6;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryCard,
+.panel {
+  background: #ffffff;
+  border: 1px solid #d9e1e7;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.summaryCard {
+  padding: 1.1rem 1.2rem;
+}
+
+.summaryLabel {
+  margin: 0 0 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5f6f7c;
+}
+
+.summaryValue {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #16384c;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel {
+  padding: 1.3rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panelTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.panelText {
+  margin: 0;
+  color: #5f6f7c;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.ruleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.formRow.singleColumn {
+  grid-template-columns: 1fr;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.formField label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #16384c;
+}
+.formField input,
+.formField select,
+.formField textarea {
+  width: 100%;
+  border: 1px solid #d9e1e7;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #16384c;
+  font-size: 0.96rem;
+  font-family: inherit;
+  padding: 0.85rem 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.formField input:focus,
+.formField select:focus,
+.formField textarea:focus {
+  border-color: #1f5f85;
+  box-shadow: 0 0 0 3px rgba(31, 95, 133, 0.1);
+}
+.formField textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.formFeedback {
+  min-height: 1.25rem;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #5f6f7c;
+}
+.formFeedback.isSuccess {
+  color: #2d6a42;
+}
+.formFeedback.isError {
+  color: #a43c32;
+}
+
+.helperList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.helperCard {
+  border: 1px solid #d9e1e7;
+  border-radius: 14px;
+  background: #f4f8fb;
+  padding: 1rem;
+}
+.helperCard h4 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+.helperCard p {
+  margin: 0;
+  color: #16384c;
+  line-height: 1.45;
+  font-size: 0.93rem;
+}
+
+.rulesPanel {
+  margin: 2rem 0;
+}
+
+.twoColumnBottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dataTable thead th {
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #5f6f7c;
+  padding: 0 0 0.9rem;
+  border-bottom: 1px solid #d9e1e7;
+}
+.dataTable tbody td {
+  padding: 0.95rem 0;
+  border-bottom: 1px solid #e7edf2;
+  vertical-align: top;
+  font-size: 0.94rem;
+  color: #16384c;
+}
+
+.ruleNameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ruleSubtext {
+  font-size: 0.84rem;
+  color: #5f6f7c;
+}
+
+.ruleActionGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.badge.warning {
+  background: #f7e8bf;
+  color: #8c6518;
+}
+.badge.critical {
+  background: #f9d8d3;
+  color: #a43c32;
+}
+.badge.enabled, .badge.active, .badge.resolved {
+  background: #eef8f1;
+  color: #2d6a42;
+}
+.badge.disabled, .badge.acknowledged {
+  background: #eef3f7;
+  color: #49606f;
+}
+
+.auditLog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.auditItem {
+  border: 1px solid #d9e1e7;
+  border-radius: 14px;
+  padding: 0.95rem;
+  background: #fbfdff;
+}
+
+.auditTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.auditAction {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.auditTime {
+  font-size: 0.82rem;
+  color: #5f6f7c;
+  white-space: nowrap;
+}
+
+.auditText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #16384c;
+}
+
+.emptyState {
+  margin: 0;
+  color: #5f6f7c;
+  font-size: 0.94rem;
+  padding: 1rem 0;
+}/*# sourceMappingURL=admin.css.map */
