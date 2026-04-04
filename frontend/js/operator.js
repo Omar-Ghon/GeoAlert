@@ -11,25 +11,25 @@ const metricDefinitions = [
     key: "airQuality",
     label: "Air Quality",
     unit: "AQI",
-    detailsPage: "zone-metric-details.html?metric=airQuality"
+    detailsPage: "operator-zone-metrics.html?metric=airQuality"
   },
   {
     key: "temperature",
     label: "Temperature",
     unit: "°C",
-    detailsPage: "zone-metric-details.html?metric=temperature"
+    detailsPage: "operator-zone-metrics.html?metric=temperature"
   },
   {
     key: "humidity",
     label: "Humidity",
     unit: "%",
-    detailsPage: "zone-metric-details.html?metric=humidity"
+    detailsPage: "operator-zone-metrics.html?metric=humidity"
   },
   {
     key: "noiseLevel",
     label: "Noise Level",
     unit: "dB",
-    detailsPage: "zone-metric-details.html?metric=noiseLevel"
+    detailsPage: "operator-zone-metrics.html?metric=noiseLevel"
   }
 ];
 
@@ -334,8 +334,8 @@ function getSensorSeverity(metricKey, readingValue) {
   };
 }
 
-function getSensorDetailsPage(sensor, zone) {
-  return `sensor-details.html?zone=${zone.id}&sensor=${sensor.id}`;
+function getOperatorZoneMetricsPage(zone, metricKey) {
+  return `operator-zone-metrics.html?zone=${zone.id}&metric=${metricKey}`;
 }
 
 function getMetricLabel(metricKey) {
@@ -355,7 +355,7 @@ function renderMapMarkers() {
         .map((sensor) => {
           const latestReading = getLatestReading(sensor);
           const value = latestReading ? latestReading.value : null;
-          const detailsPage = getSensorDetailsPage(sensor, zone);
+          const detailsPage = getOperatorZoneMetricsPage(zone, sensor.sensorType);
           const sensorLetter = getSensorTypeLetter(sensor.sensorType);
           const severity = getSensorSeverity(sensor.sensorType, value);
           const displayValue = value === null ? "N/A" : value;
@@ -423,12 +423,12 @@ function renderZones() {
               <p class="metricMeta">5-minute average</p>
               <p class="metricSensorCount">${sensors.length} sensor${sensors.length === 1 ? "" : "s"} in this zone</p>
 
-              <a
-                class="metricLink"
-                href="${metric.detailsPage}&zone=${zone.id}"
-              >
-                View Details
-              </a>
+            <a
+            class="metricLink"
+            href="${getOperatorZoneMetricsPage(zone, metric.key)}"
+            >
+            View Details
+            </a>
             </article>
           `;
         })

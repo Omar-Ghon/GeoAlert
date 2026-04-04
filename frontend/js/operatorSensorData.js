@@ -406,11 +406,11 @@ export const hamiltonOperatorData = {
                 y: 57
             },
           readings: [
-            { timestamp: "2026-04-03T11:16:00", value: 88 },
-            { timestamp: "2026-04-03T11:17:00", value: 90 },
-            { timestamp: "2026-04-03T11:18:00", value: 91 },
-            { timestamp: "2026-04-03T11:19:00", value: 92 },
-            { timestamp: "2026-04-03T11:20:00", value: 93 }
+            { timestamp: "2026-04-03T11:16:00", value: 150 },
+            { timestamp: "2026-04-03T11:17:00", value: 160 },
+            { timestamp: "2026-04-03T11:18:00", value: 164 },
+            { timestamp: "2026-04-03T11:19:00", value: 160 },
+            { timestamp: "2026-04-03T11:20:00", value: 140 }
           ]
         }
       ]

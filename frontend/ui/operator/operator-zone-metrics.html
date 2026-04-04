@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zone Metric Details</title>
+  <link rel="stylesheet" href="../../styles/zone-metrics.css">
+</head>
+<body>
+  <header class="zoneMetricsHeaderBar">
+    <div class="zoneMetricsHeaderBarLeft">
+      <a href="../../../index.html" class="zoneMetricsLogoLink" aria-label="GeoAlert home">
+        <img src="../../assets/icons/logo.png" alt="GeoAlert logo" class="zoneMetricsLogoImage">
+      </a>
+    </div>
+
+    <div class="zoneMetricsHeaderBarCenter">
+      <h1 class="zoneMetricsBrandTitle">GeoAlert</h1>
+    </div>
+
+    <div class="zoneMetricsHeaderBarRight">
+      <div class="zoneMetricsAccountMenu" id="accountMenu">
+        <button
+          class="zoneMetricsAccountButton"
+          id="accountMenuButton"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <span class="zoneMetricsAccountName">Hamilton Operator</span>
+          <span class="zoneMetricsAccountChevron">⌄</span>
+        </button>
+
+        <div class="zoneMetricsAccountDropdown" id="accountDropdown">
+          <a href="../../index.html" class="zoneMetricsAccountDropdownItem">Log out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="zoneMetricsPage">
+    <section class="zoneMetricsShell">
+      <a href="operator.html" class="zoneMetricsBackLink">← Back to Dashboard</a>
+
+      <section class="zoneMetricsCard">
+        <div class="zoneMetricsHeader" id="zoneMetricsHeader"></div>
+
+        <div class="zoneMetricsSummaryRow" id="zoneMetricsSummaryRow"></div>
+
+        <section class="zoneMetricsChartCard">
+          <div class="zoneMetricsChartHeader">
+            <h3 class="zoneMetricsChartTitle">Sensor Trend</h3>
+            <p class="zoneMetricsChartText">
+              Each line represents one sensor of this type in the selected zone.
+            </p>
+          </div>
+
+          <div class="zoneMetricsChartWrap">
+            <canvas id="zoneMetricChart" class="zoneMetricsChartCanvas"></canvas>
+          </div>
+        </section>
+
+        <section class="zoneMetricsGaugesSection">
+        <div class="zoneMetricsChartHeader">
+            <h3 class="zoneMetricsChartTitle">Current Sensor Readings</h3>
+        </div>
+
+        <div class="zoneMetricsGaugeGrid" id="zoneMetricsGaugeGrid"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="../../js/operatorMetricDetails.js"></script>
+</body>
+</html>
