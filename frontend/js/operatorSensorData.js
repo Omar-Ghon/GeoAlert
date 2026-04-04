@@ -877,3 +877,77 @@ export const hamiltonOperatorData = {
     }
   ]
 };
+
+export const burlingtonOperatorData = {
+  cityId: "burlington",
+  cityName: "Burlington",
+  updatedAt: "2026-04-03T11:20:00",
+  alerts: [],
+  zones: [
+    {
+      id: "burlington-zone-1",
+      zoneName: "Zone 1",
+      sensors: []
+    },
+    {
+      id: "burlington-zone-2",
+      zoneName: "Zone 2",
+      sensors: []
+    },
+    {
+      id: "burlington-zone-3",
+      zoneName: "Zone 3",
+      sensors: []
+    },
+    {
+      id: "burlington-zone-4",
+      zoneName: "Zone 4",
+      sensors: []
+    },
+    {
+      id: "burlington-zone-5",
+      zoneName: "Zone 5",
+      sensors: []
+    }
+  ]
+};
+
+export const scarboroughOperatorData = {
+  cityId: "scarborough",
+  cityName: "Scarborough",
+  updatedAt: "2026-04-03T11:20:00",
+  alerts: [],
+  zones: [
+    {
+      id: "scarborough-zone-1",
+      zoneName: "Zone 1",
+      sensors: []
+    },
+    {
+      id: "scarborough-zone-2",
+      zoneName: "Zone 2",
+      sensors: []
+    },
+    {
+      id: "scarborough-zone-3",
+      zoneName: "Zone 3",
+      sensors: []
+    },
+    {
+      id: "scarborough-zone-4",
+      zoneName: "Zone 4",
+      sensors: []
+    },
+    {
+      id: "scarborough-zone-5",
+      zoneName: "Zone 5",
+      sensors: []
+    }
+  ]
+};
+
+export const adminCityData = [
+  hamiltonOperatorData,
+  burlingtonOperatorData,
+  scarboroughOperatorData
+];
