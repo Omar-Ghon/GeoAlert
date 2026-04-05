@@ -1,4 +1,6 @@
-import { hamiltonOperatorData } from "./operatorSensorData.js";
+import { fetchOperatorCityData } from "../../backend/operator.js";
+
+let operatorCityData = null;
 
 const accountMenuButton = document.getElementById("accountMenuButton");
 const accountDropdown = document.getElementById("accountDropdown");
@@ -215,11 +217,20 @@ function getZoneOverallStatus(zone) {
 }
 
 function renderAlerts() {
-  if (!alertsRow) {
+  if (!alertsRow || !operatorCityData) {
     return;
   }
 
-  alertsRow.innerHTML = hamiltonOperatorData.alerts
+  const alerts = Array.isArray(operatorCityData.alerts)
+    ? operatorCityData.alerts
+    : [];
+
+  if (!alerts.length) {
+    alertsRow.innerHTML = "";
+    return;
+  }
+
+  alertsRow.innerHTML = alerts
     .slice(0, 2)
     .map((alert) => {
       const severityClass = getAlertSeverityClass(alert.severity);
@@ -335,7 +346,7 @@ function getSensorSeverity(metricKey, readingValue) {
 }
 
 function getOperatorZoneMetricsPage(zone, metricKey) {
-  return `operator-zone-metrics.html?zone=${zone.id}&metric=${metricKey}`;
+  return `operator-zone-metrics.html?city=${operatorCityData.cityId}&zone=${zone.id}&metric=${metricKey}`;
 }
 
 function getMetricLabel(metricKey) {
@@ -348,7 +359,7 @@ function renderMapMarkers() {
     return;
   }
 
-  const markersMarkup = hamiltonOperatorData.zones
+  const markersMarkup = operatorCityData.zones
     .flatMap((zone) =>
       zone.sensors
         .filter((sensor) => sensor.mapPosition)
@@ -397,7 +408,7 @@ function renderZones() {
     return;
   }
 
-  zoneList.innerHTML = hamiltonOperatorData.zones
+  zoneList.innerHTML = operatorCityData.zones
     .map((zone) => {
       const metricCardsMarkup = metricDefinitions
         .map((metric) => {
@@ -452,6 +463,20 @@ function renderZones() {
     .join("");
 }
 
-renderAlerts();
-renderZones();
-renderMapMarkers();
+
+async function initOperatorPage() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const cityId = params.get("city") || "hamilton";
+
+    operatorCityData = await fetchOperatorCityData(cityId, 60);
+
+    renderAlerts();
+    renderMapMarkers();
+    renderZones();
+  } catch (error) {
+    console.error("Failed to initialize operator page:", error);
+  }
+}
+
+initOperatorPage();

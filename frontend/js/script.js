@@ -1,6 +1,6 @@
-import { sensorZones } from "./sensorData.js";
 import { processZoneAlerts } from "./alertService.js";
 import { getUserSettings } from "./userManager.js";
+import { loadSensorZones } from "./liveSensorData.js";
 
 /* LOGIN PAGE */
 
@@ -43,7 +43,8 @@ const gaugeGrid = document.getElementById("gaugeGrid");
 const zoneName = document.getElementById("zoneName");
 const zoneUpdatedAt = document.getElementById("zoneUpdatedAt");
 
-let activeZoneId = sensorZones[0].id;
+let sensorZones = [];
+let activeZoneId = null;
 let isTypingZoneSearch = false;
 
 function getGaugePercent(value, min, max) {
@@ -202,8 +203,21 @@ function renderZoneData() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (zoneSearchInput && zoneDropdown && zoneName && zoneUpdatedAt && gaugeGrid) {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!(zoneSearchInput && zoneDropdown && zoneName && zoneUpdatedAt && gaugeGrid)) {
+    return;
+  }
+
+  try {
+    sensorZones = await loadSensorZones("hamilton", 60);
+
+    if (!sensorZones.length) {
+      gaugeGrid.innerHTML = "<p>No live zone data found.</p>";
+      return;
+    }
+
+    activeZoneId = sensorZones[0].id;
+
     const initialZone = getActiveZone();
 
     if (initialZone) {
@@ -246,9 +260,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Set up periodic alert checking every 5 minutes
-    setInterval(() => {
-      renderZoneData();
+    setInterval(async () => {
+      try {
+        sensorZones = await loadSensorZones("hamilton", 60);
+
+        if (!sensorZones.find((zone) => zone.id === activeZoneId) && sensorZones.length) {
+          activeZoneId = sensorZones[0].id;
+        }
+
+        renderZoneDropdown(zoneSearchInput.value);
+        renderZoneData();
+      } catch (error) {
+        console.error("Failed to refresh live sensor data:", error);
+      }
     }, 5 * 60 * 1000);
+  } catch (error) {
+    console.error("Failed to load dashboard data:", error);
+    gaugeGrid.innerHTML = `
+      <p style="color: #b54a2f; font-weight: 600;">
+        Failed to load live sensor data.
+      </p>
+    `;
   }
 });

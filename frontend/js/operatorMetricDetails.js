@@ -1,4 +1,6 @@
-import { hamiltonOperatorData } from "./operatorSensorData.js";
+import { fetchOperatorCityData } from "../../backend/operator.js";
+
+let operatorCityData = null;
 
 const accountMenuButton = document.getElementById("accountMenuButton");
 const accountDropdown = document.getElementById("accountDropdown");
@@ -466,25 +468,39 @@ function renderInvalidState() {
     }
 }
 
-function initZoneMetricPage() {
-  const params = new URLSearchParams(window.location.search);
-  const zoneId = params.get("zone");
-  const metricKey = params.get("metric");
+async function initZoneMetricPage() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const cityId = params.get("city") || "hamilton";
+    const zoneId = params.get("zone");
+    const metricKey = params.get("metric");
 
-  const zone = hamiltonOperatorData.zones.find((item) => item.id === zoneId);
-  const metric = getMetricDefinition(metricKey);
+    operatorCityData = await fetchOperatorCityData(cityId, 60);
 
-  if (!zone || !metric) {
+    if (!operatorCityData || !Array.isArray(operatorCityData.zones)) {
+      renderInvalidState();
+      return;
+    }
+
+    const zone = operatorCityData.zones.find((item) => item.id === zoneId);
+    const metric = getMetricDefinition(metricKey);
+
+    if (!zone || !metric) {
+      renderInvalidState();
+      return;
+    }
+
+    const sensors = zone.sensors.filter((sensor) => sensor.sensorType === metricKey);
+
+    renderHeader(zone, metric);
+    renderSummaryCards(metric.key, metric.unit, sensors);
+    renderChart(metric.key, sensors);
+    renderGaugeGrid(metric.key, metric.unit, zone, sensors);
+  } catch (error) {
+    console.error("Failed to initialize zone metric page:", error);
     renderInvalidState();
-    return;
   }
-
-  const sensors = zone.sensors.filter((sensor) => sensor.sensorType === metricKey);
-
-  renderHeader(zone, metric);
-  renderSummaryCards(metric.key, metric.unit, sensors);
-  renderChart(metric.key, sensors);
-  renderGaugeGrid(metric.key, metric.unit, zone, sensors);
 }
 
 initZoneMetricPage();
+
