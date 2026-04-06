@@ -1,24 +1,28 @@
 import {
-  formatLevelsSummary,
-  formatRuleEvaluation,
-  getAdminCities,
-  getCityData,
-  getMetrics,
-  getZones,
-  metricConfig
-} from "./adminAlerts.js";
-
-import {
   getRulesApi,
   createRuleApi,
   updateRuleApi,
   deleteRuleApi,
-  getAlertsApi
+  getAlertsApi,
+  fetchOperatorCityData
 } from "./adminApi.js";
+
+const CITY_OPTIONS = [
+  { cityId: "hamilton", cityName: "Hamilton" },
+  { cityId: "halton", cityName: "Halton" }
+];
+
+const metricConfig = {
+  airQuality: { label: "Air Quality", unit: "AQI" },
+  temperature: { label: "Temperature", unit: "°C" },
+  humidity: { label: "Humidity", unit: "%" },
+  noiseLevel: { label: "Noise Level", unit: "dB" }
+};
 
 let currentRules = [];
 let currentTriggeredAlerts = [];
 let currentAuditEntries = [];
+let cityDataCache = {};
 
 const accountMenuButton = document.getElementById("accountMenuButton");
 const accountDropdown = document.getElementById("accountDropdown");
@@ -33,7 +37,6 @@ const editingRuleIdInput = document.getElementById("editingRuleId");
 const submitRuleButton = document.getElementById("submitRuleButton");
 
 const cityIdSelect = document.getElementById("cityId");
-
 const zoneIdSelect = document.getElementById("zoneId");
 const metricSelect = document.getElementById("metric");
 const formFeedback = document.getElementById("formFeedback");
@@ -64,6 +67,44 @@ function getSelectedCityId() {
   return cityIdSelect?.value || getCityFromUrl() || "hamilton";
 }
 
+function getAdminCities() {
+  return CITY_OPTIONS;
+}
+
+function getCityData(cityId) {
+  const found = CITY_OPTIONS.find((city) => city.cityId === cityId);
+  return found || { cityId, cityName: capitalizeWords(cityId) };
+}
+
+function getMetrics() {
+  return Object.entries(metricConfig).map(([value, config]) => ({
+    value,
+    label: config.label
+  }));
+}
+
+function getZones(cityId) {
+  const cityData = cityDataCache[cityId];
+  if (!cityData?.zones?.length) {
+    return [];
+  }
+
+  return cityData.zones.map((zone) => ({
+    id: zone.id,
+    zoneName: zone.zoneName || capitalizeWords(zone.id)
+  }));
+}
+
+async function ensureCityData(cityId) {
+  if (cityDataCache[cityId]) {
+    return cityDataCache[cityId];
+  }
+
+  const data = await fetchOperatorCityData(cityId, 60);
+  cityDataCache[cityId] = data;
+  return data;
+}
+
 function updateCityUi(selectedCityId = getSelectedCityId()) {
   const cityData = getCityData(selectedCityId);
 
@@ -85,15 +126,16 @@ initializeAdminPage();
 async function initializeAdminPage() {
   populateCityOptions();
   cityIdSelect.value = getCityFromUrl();
-  populateZoneOptions(getSelectedCityId());
   populateMetricOptions();
   updateCityUi(getSelectedCityId());
   setupAccountMenu();
   setupEventListeners();
   resetFormState();
-  cityIdSelect.value = getCityFromUrl();
+
+  await ensureCityData(getSelectedCityId());
   populateZoneOptions(getSelectedCityId());
   updateCityUi(getSelectedCityId());
+
   await renderAllFromApi();
 }
 
@@ -120,9 +162,10 @@ function setupEventListeners() {
   }
 
   if (clearFormButton) {
-    clearFormButton.addEventListener("click", () => {
+    clearFormButton.addEventListener("click", async () => {
       resetFormState();
       cityIdSelect.value = getCityFromUrl();
+      await ensureCityData(getSelectedCityId());
       populateZoneOptions(getSelectedCityId());
       updateCityUi(getSelectedCityId());
       clearFeedback();
@@ -130,9 +173,10 @@ function setupEventListeners() {
   }
 
   if (cancelEditButton) {
-    cancelEditButton.addEventListener("click", () => {
+    cancelEditButton.addEventListener("click", async () => {
       resetFormState();
       cityIdSelect.value = getCityFromUrl();
+      await ensureCityData(getSelectedCityId());
       populateZoneOptions(getSelectedCityId());
       updateCityUi(getSelectedCityId());
       showFeedback("Edit cancelled.", "success");
@@ -140,9 +184,10 @@ function setupEventListeners() {
   }
 
   if (resetRulesButton) {
-    resetRulesButton.addEventListener("click", () => {
+    resetRulesButton.addEventListener("click", async () => {
       resetFormState();
       cityIdSelect.value = getCityFromUrl();
+      await ensureCityData(getSelectedCityId());
       populateZoneOptions(getSelectedCityId());
       updateCityUi(getSelectedCityId());
       clearFeedback();
@@ -153,6 +198,9 @@ function setupEventListeners() {
   if (runEvaluationButton) {
     runEvaluationButton.addEventListener("click", async () => {
       try {
+        cityDataCache = {};
+        await ensureCityData(getSelectedCityId());
+        populateZoneOptions(getSelectedCityId());
         await renderAllFromApi();
         showFeedback("Rules refreshed from AWS successfully.", "success");
       } catch (error) {
@@ -166,6 +214,7 @@ function setupEventListeners() {
     cityIdSelect.addEventListener("change", async () => {
       const selectedCityId = cityIdSelect.value;
       setCityInUrl(selectedCityId);
+      await ensureCityData(selectedCityId);
       populateZoneOptions(selectedCityId);
       updateCityUi(selectedCityId);
       await renderAllFromApi();
@@ -225,6 +274,8 @@ async function handleRuleSubmit(event) {
       showFeedback("Alert rule created successfully.", "success");
     }
 
+    cityDataCache = {};
+    await ensureCityData(payload.cityId);
     await renderAllFromApi();
     resetFormState();
     cityIdSelect.value = payload.cityId;
@@ -302,7 +353,7 @@ async function handleRulesTableActions(event) {
 
   if (editButton) {
     const ruleId = editButton.dataset.ruleId;
-    startEditingRule(ruleId);
+    await startEditingRule(ruleId);
     return;
   }
 
@@ -314,6 +365,7 @@ async function handleRulesTableActions(event) {
       await renderAllFromApi();
       resetFormState();
       cityIdSelect.value = getCityFromUrl();
+      await ensureCityData(getSelectedCityId());
       populateZoneOptions(getSelectedCityId());
       updateCityUi(getSelectedCityId());
       showFeedback("Rule deleted.", "success");
@@ -324,9 +376,11 @@ async function handleRulesTableActions(event) {
   }
 }
 
-function startEditingRule(ruleId) {
+async function startEditingRule(ruleId) {
   const rule = currentRules.find((item) => item.ruleId === ruleId);
   if (!rule) return;
+
+  await ensureCityData(rule.cityId || "hamilton");
 
   editingRuleIdInput.value = rule.ruleId;
   document.getElementById("ruleName").value = rule.ruleName;
@@ -414,6 +468,42 @@ function renderSummary() {
   updateCityUi(selectedCityId);
 }
 
+function formatLevelsSummary(rule) {
+  const levels = rule.levels || [];
+
+  if (!levels.length) {
+    return `<span class="ruleSubtext">No levels</span>`;
+  }
+
+  return levels
+    .map((level) => {
+      const thresholdText =
+        level.threshold !== undefined && level.threshold !== null
+          ? ` (${level.threshold})`
+          : "";
+      return `<span class="badge ${escapeHtml(level.id)}">${escapeHtml(level.label)}${escapeHtml(thresholdText)}</span>`;
+    })
+    .join(" ");
+}
+
+function formatRuleEvaluation(rule) {
+  const evalLabel =
+    rule.evaluationType === "zoneAverage" ? "Zone Average" : "Single Sensor";
+
+  const comparisonLabel =
+    rule.comparison === "lessThan" ? "Less Than" : "Greater Than";
+
+  const windowLabel =
+    rule.window === "fiveMinuteAverage" ? "5-Minute Average" : "Latest Reading";
+
+  return `
+    <div class="ruleNameCell">
+      <strong>${escapeHtml(evalLabel)}</strong>
+      <span class="ruleSubtext">${escapeHtml(comparisonLabel)} · ${escapeHtml(windowLabel)}</span>
+    </div>
+  `;
+}
+
 function renderRulesTable() {
   const rules = currentRules;
 
@@ -485,15 +575,15 @@ function renderTriggeredAlerts() {
       <tr>
         <td>
           <div class="ruleNameCell">
-            <strong>${escapeHtml(alert.ruleName)}</strong>
-            <span class="ruleSubtext">${escapeHtml(alert.message)}</span>
+            <strong>${escapeHtml(alert.ruleName || "Triggered Alert")}</strong>
+            <span class="ruleSubtext">${escapeHtml(alert.message || "")}</span>
           </div>
         </td>
         <td>${escapeHtml(getZoneLabel(alert.zoneId, alert.cityId || "hamilton"))}</td>
         <td>${escapeHtml(metricConfig[alert.metric]?.label ?? alert.metric)}</td>
-        <td><span class="badge ${alert.severity}">${escapeHtml(alert.severityLabel)}</span></td>
-        <td>${alert.reading} ${escapeHtml(alert.unit)}</td>
-        <td><span class="badge active">${capitalize(alert.status)}</span></td>
+        <td><span class="badge ${escapeHtml((alert.severity || "mild").toLowerCase())}">${escapeHtml(alert.severityLabel || alert.severity || "Alert")}</span></td>
+        <td>${escapeHtml(String(alert.reading ?? ""))} ${escapeHtml(alert.unit || "")}</td>
+        <td><span class="badge active">${escapeHtml(capitalize(alert.status || "active"))}</span></td>
       </tr>
     `)
     .join("");
@@ -527,11 +617,17 @@ function clearFeedback() {
 }
 
 function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  return String(value || "").charAt(0).toUpperCase() + String(value || "").slice(1);
+}
+
+function capitalizeWords(value) {
+  return String(value || "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function escapeHtml(value) {
-  return String(value)
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -540,6 +636,7 @@ function escapeHtml(value) {
 }
 
 async function renderAllFromApi() {
+  await ensureCityData(getSelectedCityId());
   await loadRulesFromApi();
   await loadAlertsFromApi();
   renderRulesTable();
