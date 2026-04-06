@@ -514,3 +514,108 @@ body {
     --gaugeColor: #3b82f6;
   }
 }
+
+.publicAlertsPanel {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #d8dee6;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.publicAlertsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.publicAlertsTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.publicAlertsCount {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1d4ed8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.publicAlertsList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.publicAlertsEmpty {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.publicAlertItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.publicAlertTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.publicAlertSeverity {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.publicAlertSeverity.isMild {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.publicAlertSeverity.isModerate {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.publicAlertSeverity.isSevere {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.publicAlertCity {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: capitalize;
+}
+
+.publicAlertMessage {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #111827;
+}

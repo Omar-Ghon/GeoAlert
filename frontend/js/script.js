@@ -1,6 +1,7 @@
 import { processZoneAlerts } from "./alertService.js";
 import { getUserSettings } from "./userManager.js";
 import { loadSensorZones } from "./liveSensorData.js";
+import { getPublicAlertsApi } from "./adminApi.js";
 
 /* LOGIN PAGE */
 
@@ -283,3 +284,91 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 });
+
+function capitalizeWords(value) {
+  return String(value || "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getPublicSeverityClass(severity) {
+  const normalized = String(severity || "").toLowerCase();
+
+  if (normalized === "severe" || normalized === "critical") {
+    return "isSevere";
+  }
+
+  if (normalized === "moderate" || normalized === "warning") {
+    return "isModerate";
+  }
+
+  return "isMild";
+}
+
+function renderPublicAlerts(alerts) {
+  const publicAlertsList = document.getElementById("publicAlertsList");
+  const publicAlertsCount = document.getElementById("publicAlertsCount");
+
+  if (!publicAlertsList || !publicAlertsCount) {
+    return;
+  }
+
+  publicAlertsCount.textContent = String(alerts.length);
+
+  if (!alerts.length) {
+    publicAlertsList.innerHTML = `
+      <p class="publicAlertsEmpty">No public alerts right now.</p>
+    `;
+    return;
+  }
+
+  publicAlertsList.innerHTML = alerts
+    .slice(0, 3)
+    .map((alert) => {
+      const severityLabel = capitalizeWords(
+        alert.severityLabel || alert.severity || "Alert"
+      );
+      const cityLabel = capitalizeWords(alert.cityId || "Unknown City");
+      const message =
+        alert.publicMessage ||
+        `${cityLabel} ${capitalizeWords(alert.metric || "environmental")} conditions need attention.`;
+
+      return `
+        <article class="publicAlertItem">
+          <div class="publicAlertTop">
+            <span class="publicAlertSeverity ${getPublicSeverityClass(alert.severity)}">
+              ${severityLabel}
+            </span>
+            <span class="publicAlertCity">${cityLabel}</span>
+          </div>
+          <p class="publicAlertMessage">${message}</p>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function loadPublicAlerts() {
+  try {
+    const alerts = await getPublicAlertsApi();
+    renderPublicAlerts(alerts);
+  } catch (error) {
+    console.error("Failed to load public alerts:", error);
+
+    const publicAlertsList = document.getElementById("publicAlertsList");
+    const publicAlertsCount = document.getElementById("publicAlertsCount");
+
+    if (publicAlertsCount) {
+      publicAlertsCount.textContent = "0";
+    }
+
+    if (publicAlertsList) {
+      publicAlertsList.innerHTML = `
+        <p class="publicAlertsEmpty">Unable to load public alerts.</p>
+      `;
+    }
+  }
+}
+
+loadPublicAlerts();
+setInterval(loadPublicAlerts, 15000);
