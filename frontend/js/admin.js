@@ -47,9 +47,21 @@ const summaryZones = document.getElementById("summaryZones");
 const summaryRules = document.getElementById("summaryRules");
 const summaryTriggered = document.getElementById("summaryTriggered");
 const accountMenuUsername = document.getElementById("accountMenuUsername");
+const adminSubheading = document.getElementById("adminSubheading");
+
+function getCityFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("city") || "hamilton";
+}
+
+function setCityInUrl(cityId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("city", cityId);
+  window.history.replaceState({}, "", url);
+}
 
 function getSelectedCityId() {
-  return cityIdSelect?.value || "hamilton";
+  return cityIdSelect?.value || getCityFromUrl() || "hamilton";
 }
 
 function updateCityUi(selectedCityId = getSelectedCityId()) {
@@ -62,18 +74,26 @@ function updateCityUi(selectedCityId = getSelectedCityId()) {
   if (accountMenuUsername) {
     accountMenuUsername.textContent = `${cityData.cityName} Admin`;
   }
+
+  if (adminSubheading) {
+    adminSubheading.textContent = `Create and manage ${cityData.cityName} alert rules using zone-based thresholds.`;
+  }
 }
 
 initializeAdminPage();
 
 async function initializeAdminPage() {
   populateCityOptions();
+  cityIdSelect.value = getCityFromUrl();
   populateZoneOptions(getSelectedCityId());
   populateMetricOptions();
   updateCityUi(getSelectedCityId());
   setupAccountMenu();
   setupEventListeners();
   resetFormState();
+  cityIdSelect.value = getCityFromUrl();
+  populateZoneOptions(getSelectedCityId());
+  updateCityUi(getSelectedCityId());
   await renderAllFromApi();
 }
 
@@ -102,6 +122,9 @@ function setupEventListeners() {
   if (clearFormButton) {
     clearFormButton.addEventListener("click", () => {
       resetFormState();
+      cityIdSelect.value = getCityFromUrl();
+      populateZoneOptions(getSelectedCityId());
+      updateCityUi(getSelectedCityId());
       clearFeedback();
     });
   }
@@ -109,38 +132,45 @@ function setupEventListeners() {
   if (cancelEditButton) {
     cancelEditButton.addEventListener("click", () => {
       resetFormState();
+      cityIdSelect.value = getCityFromUrl();
+      populateZoneOptions(getSelectedCityId());
+      updateCityUi(getSelectedCityId());
       showFeedback("Edit cancelled.", "success");
     });
   }
 
-if (resetRulesButton) {
-  resetRulesButton.addEventListener("click", () => {
-    resetFormState();
-    clearFeedback();
-    showFeedback("Demo reset is disabled in AWS mode.", "success");
-  });
-}
+  if (resetRulesButton) {
+    resetRulesButton.addEventListener("click", () => {
+      resetFormState();
+      cityIdSelect.value = getCityFromUrl();
+      populateZoneOptions(getSelectedCityId());
+      updateCityUi(getSelectedCityId());
+      clearFeedback();
+      showFeedback("Form cleared.", "success");
+    });
+  }
 
-if (runEvaluationButton) {
-  runEvaluationButton.addEventListener("click", async () => {
-    try {
+  if (runEvaluationButton) {
+    runEvaluationButton.addEventListener("click", async () => {
+      try {
+        await renderAllFromApi();
+        showFeedback("Rules refreshed from AWS successfully.", "success");
+      } catch (error) {
+        console.error("refresh error:", error);
+        showFeedback(error.message || "Failed to refresh rules.", "error");
+      }
+    });
+  }
+
+  if (cityIdSelect) {
+    cityIdSelect.addEventListener("change", async () => {
+      const selectedCityId = cityIdSelect.value;
+      setCityInUrl(selectedCityId);
+      populateZoneOptions(selectedCityId);
+      updateCityUi(selectedCityId);
       await renderAllFromApi();
-      showFeedback("Rules refreshed from AWS successfully.", "success");
-    } catch (error) {
-      console.error("refresh error:", error);
-      showFeedback(error.message || "Failed to refresh rules.", "error");
-    }
-  });
-}
-
-if (cityIdSelect) {
-  cityIdSelect.addEventListener("change", async () => {
-    const selectedCityId = cityIdSelect.value;
-    populateZoneOptions(selectedCityId);
-    updateCityUi(selectedCityId);
-    await renderAllFromApi();
-  });
-}
+    });
+  }
 
   if (rulesTableBody) {
     rulesTableBody.addEventListener("click", handleRulesTableActions);
@@ -155,7 +185,7 @@ function populateCityOptions() {
     .join("");
 }
 
-function populateZoneOptions(selectedCityId = cityIdSelect?.value || "hamilton") {
+function populateZoneOptions(selectedCityId = getSelectedCityId()) {
   const cityData = getCityData(selectedCityId);
   const zones = getZones(selectedCityId);
 
@@ -197,6 +227,10 @@ async function handleRuleSubmit(event) {
 
     await renderAllFromApi();
     resetFormState();
+    cityIdSelect.value = payload.cityId;
+    populateZoneOptions(payload.cityId);
+    updateCityUi(payload.cityId);
+    setCityInUrl(payload.cityId);
   } catch (error) {
     console.error("handleRuleSubmit error:", error);
     showFeedback(error.message || "Failed to save rule.", "error");
@@ -279,6 +313,9 @@ async function handleRulesTableActions(event) {
       await deleteRuleApi(ruleId);
       await renderAllFromApi();
       resetFormState();
+      cityIdSelect.value = getCityFromUrl();
+      populateZoneOptions(getSelectedCityId());
+      updateCityUi(getSelectedCityId());
       showFeedback("Rule deleted.", "success");
     } catch (error) {
       console.error("delete rule error:", error);
@@ -287,14 +324,13 @@ async function handleRulesTableActions(event) {
   }
 }
 
-
 function startEditingRule(ruleId) {
   const rule = currentRules.find((item) => item.ruleId === ruleId);
   if (!rule) return;
 
   editingRuleIdInput.value = rule.ruleId;
   document.getElementById("ruleName").value = rule.ruleName;
-  cityIdSelect.value = rule.cityId || "hamilton";
+  cityIdSelect.value = rule.cityId || getCityFromUrl() || "hamilton";
   populateZoneOptions(cityIdSelect.value);
   zoneIdSelect.value = rule.zoneId;
   metricSelect.value = rule.metric;
@@ -308,6 +344,8 @@ function startEditingRule(ruleId) {
 
   submitRuleButton.textContent = "Save Changes";
   cancelEditButton.hidden = false;
+  updateCityUi(cityIdSelect.value);
+  setCityInUrl(cityIdSelect.value);
   showFeedback(`Editing "${rule.ruleName}".`, "success");
 
   if (ruleForm) {
@@ -352,8 +390,13 @@ function resetFormState() {
   document.getElementById("levelLabelModerate").value = "Moderate";
   document.getElementById("levelLabelSevere").value = "Severe";
 
-  populateZoneOptions(getSelectedCityId());
-  updateCityUi(getSelectedCityId());
+  const selectedCityId = getCityFromUrl();
+  if (cityIdSelect) {
+    cityIdSelect.value = selectedCityId;
+  }
+
+  populateZoneOptions(selectedCityId);
+  updateCityUi(selectedCityId);
 
   clearFeedback();
 }
@@ -464,7 +507,6 @@ function renderAuditLog() {
   auditLog.innerHTML = `<p class="emptyState">No AWS-backed audit entries yet.</p>`;
 }
 
-
 function getZoneLabel(zoneId, cityId = "hamilton") {
   if (zoneId === "all-zones") return "All Zones";
   const zone = getZones(cityId).find((item) => item.id === zoneId);
@@ -482,17 +524,6 @@ function showFeedback(message, type) {
 function clearFeedback() {
   formFeedback.textContent = "";
   formFeedback.classList.remove("isSuccess", "isError");
-}
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return date.toLocaleString([], {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
 }
 
 function capitalize(value) {
@@ -516,6 +547,7 @@ async function renderAllFromApi() {
   renderAuditLog();
   renderSummary();
 }
+
 async function loadRulesFromApi() {
   const selectedCityId = getSelectedCityId();
   currentRules = await getRulesApi(selectedCityId);

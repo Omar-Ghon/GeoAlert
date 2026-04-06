@@ -12,7 +12,8 @@ if (loginForm && usernameInput && passwordInput && loginError) {
 
     const validLogins = [
       { username: "opham", password: "opham123", redirect: "../operator/operator.html" },
-      { username: "admin", password: "admin123", redirect: "../admin/admin.html" }
+      { username: "admin", password: "admin123", redirect: "../admin/admin.html" },
+      { username: "ophal", password: "ophal123", redirect: "../operator/operator-halton.html" }
     ];
 
     const matchedLogin = validLogins.find(function (login) {

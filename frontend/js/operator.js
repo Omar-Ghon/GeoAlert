@@ -18,6 +18,7 @@ const viewAllAlertsButton = document.querySelector(".viewAllAlertsButton");
 
 const activeAlertsCount = document.getElementById("activeAlertsCount");
 const alertsTableBody = document.getElementById("alertsTableBody");
+const accountMenuUsername = document.getElementById("accountMenuUsername");
 
 const metricDefinitions = [
   {
@@ -45,6 +46,11 @@ const metricDefinitions = [
     detailsPage: "operator-zone-metrics.html?metric=noiseLevel"
   }
 ];
+
+function getCityFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("city") || "hamilton";
+}
 
 if (accountMenuButton && accountDropdown) {
   accountMenuButton.addEventListener("click", () => {
@@ -127,18 +133,6 @@ function getMetricLabel(metricKey) {
   return metric ? metric.label : capitalizeWords(metricKey);
 }
 
-function getAwsAlertSeverityClass(severity) {
-  if (severity === "severe" || severity === "critical") {
-    return "critical";
-  }
-
-  if (severity === "moderate" || severity === "warning") {
-    return "warning";
-  }
-
-  return "normal";
-}
-
 function getAlertCardClass(severity) {
   if (severity === "severe" || severity === "critical") {
     return "isCritical";
@@ -201,18 +195,6 @@ function getAlertSourceSubLabel(alert) {
   return `${getMetricLabel(alert.metric || alert.sensorType)} rule`;
 }
 
-function getAlertTitle(alert) {
-  const severityText = alert?.severityLabel || capitalizeWords(alert?.severity) || "Alert";
-  const metricText = getMetricLabel(alert?.metric || alert?.sensorType);
-  const zoneText = getZoneLabel(alert?.zoneId);
-
-  if (alert?.sensorId && !String(alert.sensorId).startsWith("zoneavg#")) {
-    return `${severityText} ${metricText} Alert`;
-  }
-
-  return `${zoneText} ${metricText} Alert`;
-}
-
 function getAlertMessage(alert) {
   const readingText =
     alert?.reading !== null && alert?.reading !== undefined && alert?.unit
@@ -240,10 +222,19 @@ function updateAlertUiState() {
 
   if (viewAllAlertsButton) {
     viewAllAlertsButton.classList.toggle("isUrgent", hasActiveAlerts);
+
+    const cityId = getCityFromUrl();
+    if (viewAllAlertsButton.tagName === "A") {
+      viewAllAlertsButton.href = `operator-alerts${cityId === "halton" ? "-halton" : ""}.html?city=${encodeURIComponent(cityId)}`;
+    }
   }
 
   if (activeAlertsCount) {
     activeAlertsCount.textContent = String(activeAlerts.length);
+  }
+
+  if (accountMenuUsername && operatorCityData?.cityName) {
+    accountMenuUsername.textContent = `${operatorCityData.cityName} Operator`;
   }
 }
 
@@ -257,7 +248,7 @@ function renderActiveAlertsTable() {
       <tr>
         <td colspan="7">
           <div class="alertMessageCell">
-            No active Hamilton alerts at this time.
+            No active ${escapeHtml(capitalizeWords(operatorCityData?.cityId || "city"))} alerts at this time.
           </div>
         </td>
       </tr>
@@ -312,39 +303,40 @@ function renderActiveAlertsTable() {
               <span>${escapeHtml(formatAlertDate(timeValue))}</span>
             </div>
           </td>
-<td>
-  <div class="alertActionButtons">
-    <button
-      type="button"
-      class="alertActionButton"
-      data-action="acknowledge"
-      data-alert-id="${escapeHtml(alert.alertId || "")}"
-      ${alert.status === "acknowledged" ? "disabled" : ""}
-    >
-      ${alert.status === "acknowledged" ? "Acknowledged" : "Acknowledge"}
-    </button>
 
-    <button
-      type="button"
-      class="alertActionButton isResolve"
-      data-action="resolve"
-      data-alert-id="${escapeHtml(alert.alertId || "")}"
-      ${alert.status === "resolved" ? "disabled" : ""}
-    >
-      ${alert.status === "resolved" ? "Resolved" : "Mark Resolved"}
-    </button>
+          <td>
+            <div class="alertActionButtons">
+              <button
+                type="button"
+                class="alertActionButton"
+                data-action="acknowledge"
+                data-alert-id="${escapeHtml(alert.alertId || "")}"
+                ${alert.status === "acknowledged" ? "disabled" : ""}
+              >
+                ${alert.status === "acknowledged" ? "Acknowledged" : "Acknowledge"}
+              </button>
 
-            <button
-            type="button"
-            class="alertActionButton isPublic"
-            data-action="toggle-public"
-            data-alert-id="${escapeHtml(alert.alertId || "")}"
-            data-is-public="${alert.isPublic ? "true" : "false"}"
-            >
-            ${alert.isPublic ? "Remove from Public" : "Make Public"}
-            </button>
-        </div>
-        </td>
+              <button
+                type="button"
+                class="alertActionButton isResolve"
+                data-action="resolve"
+                data-alert-id="${escapeHtml(alert.alertId || "")}"
+                ${alert.status === "resolved" ? "disabled" : ""}
+              >
+                ${alert.status === "resolved" ? "Resolved" : "Mark Resolved"}
+              </button>
+
+              <button
+                type="button"
+                class="alertActionButton isPublic"
+                data-action="toggle-public"
+                data-alert-id="${escapeHtml(alert.alertId || "")}"
+                data-is-public="${alert.isPublic ? "true" : "false"}"
+              >
+                ${alert.isPublic ? "Remove from Public" : "Make Public"}
+              </button>
+            </div>
+          </td>
         </tr>
       `;
     })
@@ -709,8 +701,6 @@ function renderZones() {
         })
         .join("");
 
-      const zoneStatus = getZoneOverallStatus(zone);
-
       return `
         <section class="zoneCard">
           <div class="zoneCardTop">
@@ -730,8 +720,7 @@ function renderZones() {
 }
 
 async function loadAndRenderOperatorPage() {
-  const params = new URLSearchParams(window.location.search);
-  const cityId = params.get("city") || "hamilton";
+  const cityId = getCityFromUrl();
 
   const [cityData, alerts] = await Promise.all([
     fetchOperatorCityData(cityId, 60),

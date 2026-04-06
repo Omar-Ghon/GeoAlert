@@ -1,6 +1,3 @@
-import { processZoneAlerts } from "./alertService.js";
-import { getUserSettings } from "./userManager.js";
-import { loadSensorZones } from "./liveSensorData.js";
 import { getPublicAlertsApi } from "./adminApi.js";
 
 /* LOGIN PAGE */
@@ -37,22 +34,93 @@ if (loginForm && usernameInput && passwordInput && loginError) {
 
 /* DASHBOARD PAGE */
 
-const zoneSelector = document.getElementById("zoneSelector");
-const zoneSearchInput = document.getElementById("zoneSearchInput");
-const zoneDropdown = document.getElementById("zoneDropdown");
+const citySelector = document.getElementById("zoneSelector");
+const citySearchInput = document.getElementById("zoneSearchInput");
+const cityDropdown = document.getElementById("zoneDropdown");
 const gaugeGrid = document.getElementById("gaugeGrid");
 const zoneName = document.getElementById("zoneName");
 const zoneUpdatedAt = document.getElementById("zoneUpdatedAt");
 
-let sensorZones = [];
-let activeZoneId = null;
-let isTypingZoneSearch = false;
+const OPERATOR_BASE_URL = "https://z0kfbot2qb.execute-api.us-east-1.amazonaws.com";
+
+
+const CITY_OPTIONS = [
+  { id: "hamilton", name: "Hamilton" },
+  { id: "halton", name: "Halton" }
+];
+
+let activeCityId = CITY_OPTIONS[0]?.id || "hamilton";
+let activeCityData = null;
+let isTypingCitySearch = false;
+
+const metricDefinitions = [
+  {
+    id: "airQuality",
+    label: "Air Quality",
+    unit: "AQI",
+    min: 0,
+    max: 150
+  },
+  {
+    id: "temperature",
+    label: "Temperature",
+    unit: "°C",
+    min: -10,
+    max: 45
+  },
+  {
+    id: "humidity",
+    label: "Humidity",
+    unit: "%",
+    min: 0,
+    max: 100
+  },
+  {
+    id: "noiseLevel",
+    label: "Noise Level",
+    unit: "dB",
+    min: 0,
+    max: 150
+  }
+];
+
+async function fetchOperatorCityData(cityId = "hamilton", minutes = 60) {
+  const response = await fetch(
+    `${OPERATOR_BASE_URL}/api/operator?cityId=${encodeURIComponent(cityId)}&minutes=${encodeURIComponent(minutes)}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load operator data");
+  }
+
+  return response.json();
+}
+
+function capitalizeWords(value) {
+  return String(value || "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getCityName(cityId) {
+  const match = CITY_OPTIONS.find((city) => city.id === cityId);
+  return match ? match.name : capitalizeWords(cityId);
+}
 
 function getGaugePercent(value, min, max) {
-  return ((value - min) / (max - min)) * 100;
+  if (value === null || value === undefined) {
+    return 0;
+  }
+
+  const clampedValue = Math.max(min, Math.min(max, value));
+  return ((clampedValue - min) / (max - min)) * 100;
 }
 
 function getGaugeTone(metricId, value) {
+  if (value === null || value === undefined) {
+    return "moderate";
+  }
+
   if (metricId === "airQuality") {
     if (value <= 50) return "good";
     if (value <= 100) return "moderate";
@@ -84,92 +152,176 @@ function titleCaseTone(tone) {
   return tone.charAt(0).toUpperCase() + tone.slice(1);
 }
 
-function getActiveZone() {
-  return sensorZones.find((zone) => zone.id === activeZoneId);
-}
-
-function renderZoneDropdown(filterText = "") {
-  if (!zoneDropdown) return;
-
-  const normalizedFilter = filterText.trim().toLowerCase();
-
-  const filteredZones = sensorZones.filter((zone) =>
-    zone.zoneName.toLowerCase().includes(normalizedFilter)
-  );
-
-  zoneDropdown.innerHTML = "";
-
-  if (filteredZones.length === 0) {
-    const emptyState = document.createElement("div");
-    emptyState.className = "zoneDropdownEmpty";
-    emptyState.textContent = "No matching zones";
-    zoneDropdown.appendChild(emptyState);
-    return;
+function formatGaugeValue(metricId, value) {
+  if (value === null || value === undefined) {
+    return "N/A";
   }
 
-  filteredZones.forEach((zone) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "zoneDropdownItem";
-    button.textContent = zone.zoneName;
+  if (metricId === "temperature") {
+    return Number(value).toFixed(1);
+  }
 
-    if (zone.id === activeZoneId) {
-      button.classList.add("active");
-    }
+  return Number(value).toFixed(0);
+}
 
-    button.addEventListener("click", () => {
-      activeZoneId = zone.id;
+function formatUpdatedTime(isoString) {
+  if (!isoString) {
+    return "Unknown";
+  }
 
-      if (zoneSearchInput) {
-        zoneSearchInput.value = zone.zoneName;
-      }
+  const date = new Date(isoString);
 
-      renderZoneDropdown(zone.zoneName);
-      renderZoneData();
-      closeZoneDropdown();
-    });
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
 
-    zoneDropdown.appendChild(button);
+  return date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit"
   });
 }
 
-function openZoneDropdown() {
-  if (!zoneSelector) return;
-  zoneSelector.classList.add("open");
-}
-
-function closeZoneDropdown() {
-  if (!zoneSelector) return;
-  zoneSelector.classList.remove("open");
-}
-
-function renderZoneData() {
-  if (!gaugeGrid || !zoneName || !zoneUpdatedAt) return;
-
-  const selectedZone = getActiveZone();
-  if (!selectedZone) return;
-
-  zoneName.textContent = selectedZone.zoneName;
-  zoneUpdatedAt.textContent = selectedZone.updatedAt;
-
-  // Check for alerts on this zone
-  const userSettings = getUserSettings();
-  if (userSettings && userSettings.alertsEnabled) {
-    processZoneAlerts(selectedZone, {
-      phoneNumber: userSettings.phoneNumber,
-      enabled: userSettings.alertsEnabled,
-      customThresholds: userSettings.customThresholds,
-      notificationsPreference: userSettings.notificationsPreference
-    }).catch(error => {
-      console.error("Error processing zone alerts:", error);
-    });
+function getLatestReading(sensor) {
+  if (!sensor?.readings?.length) {
+    return null;
   }
+
+  return sensor.readings[sensor.readings.length - 1];
+}
+
+function getAllSensorsFromCity(cityData) {
+  if (!cityData?.zones?.length) {
+    return [];
+  }
+
+  return cityData.zones.flatMap((zone) => zone.sensors || []);
+}
+
+function getCityMetricAverage(cityData, metricId) {
+  const sensors = getAllSensorsFromCity(cityData).filter(
+    (sensor) => sensor.sensorType === metricId
+  );
+
+  const latestValues = sensors
+    .map((sensor) => getLatestReading(sensor)?.value)
+    .filter((value) => value !== null && value !== undefined);
+
+  if (!latestValues.length) {
+    return null;
+  }
+
+  const total = latestValues.reduce((sum, value) => sum + value, 0);
+  return total / latestValues.length;
+}
+
+function getLatestCityTimestamp(cityData) {
+  const timestamps = getAllSensorsFromCity(cityData)
+    .map((sensor) => getLatestReading(sensor)?.timestamp)
+    .filter(Boolean)
+    .map((timestamp) => new Date(timestamp).getTime())
+    .filter((value) => !Number.isNaN(value));
+
+  if (!timestamps.length) {
+    return null;
+  }
+
+  return new Date(Math.max(...timestamps)).toISOString();
+}
+
+function renderCityDropdown(filterText = "") {
+  if (!cityDropdown) {
+    return;
+  }
+
+  const normalizedFilter = filterText.trim().toLowerCase();
+
+  const filteredCities = CITY_OPTIONS.filter((city) =>
+    city.name.toLowerCase().includes(normalizedFilter)
+  );
+
+  cityDropdown.innerHTML = "";
+
+  if (!filteredCities.length) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "zoneDropdownEmpty";
+    emptyState.textContent = "No matching cities";
+    cityDropdown.appendChild(emptyState);
+    return;
+  }
+
+  filteredCities.forEach((city) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "zoneDropdownItem";
+    button.textContent = city.name;
+
+    if (city.id === activeCityId) {
+      button.classList.add("active");
+    }
+
+button.addEventListener("click", async () => {
+  activeCityId = city.id;
+
+  if (citySearchInput) {
+    citySearchInput.value = city.name;
+  }
+
+  closeCityDropdown();
+  renderCityDropdown(city.name);
+
+  try {
+    await loadDashboardCityData();
+    await loadPublicAlerts();
+  } catch (error) {
+    console.error("Failed to switch city:", error);
+  }
+});
+
+    cityDropdown.appendChild(button);
+  });
+}
+
+function openCityDropdown() {
+  if (!citySelector) {
+    return;
+  }
+
+  citySelector.classList.add("open");
+}
+
+function closeCityDropdown() {
+  if (!citySelector) {
+    return;
+  }
+
+  citySelector.classList.remove("open");
+}
+
+function renderCityData() {
+  if (!gaugeGrid || !zoneName || !zoneUpdatedAt) {
+    return;
+  }
+
+  if (!activeCityData) {
+    gaugeGrid.innerHTML = `
+      <p style="color: #b54a2f; font-weight: 600;">
+        No city data available.
+      </p>
+    `;
+    return;
+  }
+
+  zoneName.textContent = getCityName(activeCityId);
+
+  const latestTimestamp = getLatestCityTimestamp(activeCityData);
+  zoneUpdatedAt.textContent = formatUpdatedTime(latestTimestamp);
 
   gaugeGrid.innerHTML = "";
 
-  selectedZone.gauges.forEach((gauge) => {
-    const percent = getGaugePercent(gauge.value, gauge.min, gauge.max);
-    const tone = getGaugeTone(gauge.id, gauge.value);
+  metricDefinitions.forEach((metric) => {
+    const value = getCityMetricAverage(activeCityData, metric.id);
+    const percent = getGaugePercent(value ?? metric.min, metric.min, metric.max);
+    const tone = getGaugeTone(metric.id, value);
     const toneClass = titleCaseTone(tone);
 
     const gaugeCard = document.createElement("article");
@@ -178,8 +330,8 @@ function renderZoneData() {
     gaugeCard.innerHTML = `
       <div class="gaugeCardTop">
         <div class="gaugeHeadingBlock">
-          <p class="gaugeLabel">${gauge.label}</p>
-          <p class="gaugeStatus">${gauge.status}</p>
+          <p class="gaugeLabel">${metric.label}</p>
+          <p class="gaugeStatus">${capitalizeWords(tone)}</p>
         </div>
       </div>
 
@@ -187,16 +339,16 @@ function renderZoneData() {
         <div class="gaugeVisual gaugeTone${toneClass}" style="--gaugePercent: ${percent}%;">
           <div class="gaugeInner">
             <div class="gaugeValueRow">
-              <span class="gaugeValue">${gauge.value}</span>
-              <span class="gaugeUnit">${gauge.unit}</span>
+              <span class="gaugeValue">${formatGaugeValue(metric.id, value)}</span>
+              <span class="gaugeUnit">${metric.unit}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="gaugeRangeRow">
-        <span class="gaugeRangeValue">${gauge.min}${gauge.unit}</span>
-        <span class="gaugeRangeValue">${gauge.max}${gauge.unit}</span>
+        <span class="gaugeRangeValue">${metric.min}${metric.unit}</span>
+        <span class="gaugeRangeValue">${metric.max}${metric.unit}</span>
       </div>
     `;
 
@@ -204,92 +356,12 @@ function renderZoneData() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  if (!(zoneSearchInput && zoneDropdown && zoneName && zoneUpdatedAt && gaugeGrid)) {
-    return;
-  }
-
-  try {
-    sensorZones = await loadSensorZones("hamilton", 60);
-
-    if (!sensorZones.length) {
-      gaugeGrid.innerHTML = "<p>No live zone data found.</p>";
-      return;
-    }
-
-    activeZoneId = sensorZones[0].id;
-
-    const initialZone = getActiveZone();
-
-    if (initialZone) {
-      zoneSearchInput.value = initialZone.zoneName;
-    }
-
-    renderZoneDropdown(zoneSearchInput.value);
-    renderZoneData();
-
-    zoneSearchInput.addEventListener("focus", () => {
-      if (!isTypingZoneSearch) {
-        zoneSearchInput.value = "";
-      }
-
-      isTypingZoneSearch = true;
-      openZoneDropdown();
-      renderZoneDropdown("");
-    });
-
-    zoneSearchInput.addEventListener("click", () => {
-      zoneSearchInput.value = "";
-      isTypingZoneSearch = true;
-      openZoneDropdown();
-      renderZoneDropdown("");
-    });
-
-    zoneSearchInput.addEventListener("input", (event) => {
-      isTypingZoneSearch = true;
-      openZoneDropdown();
-      renderZoneDropdown(event.target.value);
-    });
-
-    document.addEventListener("click", (event) => {
-      if (!zoneSelector.contains(event.target)) {
-        const activeZone = getActiveZone();
-        if (activeZone) {
-          zoneSearchInput.value = activeZone.zoneName;
-        }
-        closeZoneDropdown();
-      }
-    });
-
-    setInterval(async () => {
-      try {
-        sensorZones = await loadSensorZones("hamilton", 60);
-
-        if (!sensorZones.find((zone) => zone.id === activeZoneId) && sensorZones.length) {
-          activeZoneId = sensorZones[0].id;
-        }
-
-        renderZoneDropdown(zoneSearchInput.value);
-        renderZoneData();
-      } catch (error) {
-        console.error("Failed to refresh live sensor data:", error);
-      }
-    }, 5 * 60 * 1000);
-  } catch (error) {
-    console.error("Failed to load dashboard data:", error);
-    gaugeGrid.innerHTML = `
-      <p style="color: #b54a2f; font-weight: 600;">
-        Failed to load live sensor data.
-      </p>
-    `;
-  }
-});
-
-function capitalizeWords(value) {
-  return String(value || "")
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+async function loadDashboardCityData() {
+  activeCityData = await fetchOperatorCityData(activeCityId, 60);
+  renderCityData();
 }
+
+/* PUBLIC ALERTS */
 
 function getPublicSeverityClass(severity) {
   const normalized = String(severity || "").toLowerCase();
@@ -350,7 +422,7 @@ function renderPublicAlerts(alerts) {
 
 async function loadPublicAlerts() {
   try {
-    const alerts = await getPublicAlertsApi();
+    const alerts = await getPublicAlertsApi(activeCityId);
     renderPublicAlerts(alerts);
   } catch (error) {
     console.error("Failed to load public alerts:", error);
@@ -370,5 +442,68 @@ async function loadPublicAlerts() {
   }
 }
 
-loadPublicAlerts();
+/* INIT */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!(citySearchInput && cityDropdown && zoneName && zoneUpdatedAt && gaugeGrid)) {
+    return;
+  }
+
+  try {
+    citySearchInput.value = getCityName(activeCityId);
+
+    renderCityDropdown(citySearchInput.value);
+
+    await loadDashboardCityData();
+    await loadPublicAlerts();
+
+    citySearchInput.addEventListener("focus", () => {
+      if (!isTypingCitySearch) {
+        citySearchInput.value = "";
+      }
+
+      isTypingCitySearch = true;
+      openCityDropdown();
+      renderCityDropdown("");
+    });
+
+    citySearchInput.addEventListener("click", () => {
+      citySearchInput.value = "";
+      isTypingCitySearch = true;
+      openCityDropdown();
+      renderCityDropdown("");
+    });
+
+    citySearchInput.addEventListener("input", (event) => {
+      isTypingCitySearch = true;
+      openCityDropdown();
+      renderCityDropdown(event.target.value);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!citySelector.contains(event.target)) {
+        citySearchInput.value = getCityName(activeCityId);
+        closeCityDropdown();
+      }
+    });
+
+    setInterval(async () => {
+      try {
+        await loadDashboardCityData();
+        await loadPublicAlerts();
+        renderCityDropdown(citySearchInput.value);
+      } catch (error) {
+        console.error("Failed to refresh city dashboard data:", error);
+      }
+    }, 5 * 60 * 1000);
+  } catch (error) {
+    console.error("Failed to load dashboard data:", error);
+    gaugeGrid.innerHTML = `
+      <p style="color: #b54a2f; font-weight: 600;">
+        Failed to load live city data.
+      </p>
+    `;
+  }
+});
+
 setInterval(loadPublicAlerts, 15000);
