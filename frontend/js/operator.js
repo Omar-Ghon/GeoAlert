@@ -1,12 +1,23 @@
 import { fetchOperatorCityData } from "../../backend/operator.js";
+import {
+  getAlertsApi,
+  updateAlertStatusApi,
+  toggleAlertPublicApi
+} from "./adminApi.js";
 
 let operatorCityData = null;
+let activeAlerts = [];
 
 const accountMenuButton = document.getElementById("accountMenuButton");
 const accountDropdown = document.getElementById("accountDropdown");
-const alertsRow = document.getElementById("alertsRow");
 const zoneList = document.getElementById("zoneList");
 const mapMarkers = document.getElementById("mapMarkers");
+
+const operatorActionBanner = document.querySelector(".operatorActionBanner");
+const viewAllAlertsButton = document.querySelector(".viewAllAlertsButton");
+
+const activeAlertsCount = document.getElementById("activeAlertsCount");
+const alertsTableBody = document.getElementById("alertsTableBody");
 
 const metricDefinitions = [
   {
@@ -51,6 +62,10 @@ if (accountMenuButton && accountDropdown) {
 }
 
 function formatAlertTime(isoString) {
+  if (!isoString) {
+    return "Unknown time";
+  }
+
   const date = new Date(isoString);
 
   return date.toLocaleTimeString([], {
@@ -59,12 +74,65 @@ function formatAlertTime(isoString) {
   });
 }
 
-function getAlertSeverityClass(severity) {
-  if (severity === "critical") {
+function formatAlertDate(isoString) {
+  if (!isoString) {
+    return "Unknown date";
+  }
+
+  const date = new Date(isoString);
+
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function capitalizeWords(value) {
+  if (!value) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getZoneLabel(zoneId) {
+  if (!zoneId) {
+    return "Unknown zone";
+  }
+
+  if (operatorCityData?.zones?.length) {
+    const matchingZone = operatorCityData.zones.find((zone) => zone.id === zoneId);
+    if (matchingZone) {
+      return matchingZone.zoneName;
+    }
+  }
+
+  return capitalizeWords(zoneId);
+}
+
+function getMetricLabel(metricKey) {
+  const metric = metricDefinitions.find((item) => item.key === metricKey);
+  return metric ? metric.label : capitalizeWords(metricKey);
+}
+
+function getAwsAlertSeverityClass(severity) {
+  if (severity === "severe" || severity === "critical") {
     return "critical";
   }
 
-  if (severity === "warning") {
+  if (severity === "moderate" || severity === "warning") {
     return "warning";
   }
 
@@ -72,15 +140,251 @@ function getAlertSeverityClass(severity) {
 }
 
 function getAlertCardClass(severity) {
-  if (severity === "critical") {
+  if (severity === "severe" || severity === "critical") {
     return "isCritical";
   }
 
-  if (severity === "warning") {
+  if (severity === "moderate" || severity === "warning") {
     return "isWarning";
   }
 
   return "";
+}
+
+function getSeverityLabel(alert) {
+  if (alert?.severityLabel) {
+    return alert.severityLabel;
+  }
+
+  if (alert?.severity) {
+    return capitalizeWords(alert.severity);
+  }
+
+  return "Alert";
+}
+
+function getSeverityBadgeClass(alert) {
+  const severity = String(alert?.severity || "").toLowerCase();
+
+  if (severity === "severe" || severity === "critical") {
+    return "isSevere";
+  }
+
+  if (severity === "moderate" || severity === "warning") {
+    return "isModerate";
+  }
+
+  return "isMild";
+}
+
+function getAlertSourceLabel(alert) {
+  if (alert?.sensorId && !String(alert.sensorId).startsWith("zoneavg#")) {
+    return alert.sensorId;
+  }
+
+  if (alert?.ruleName) {
+    return alert.ruleName;
+  }
+
+  if (alert?.metric) {
+    return `${getZoneLabel(alert.zoneId)} ${getMetricLabel(alert.metric)}`;
+  }
+
+  return getZoneLabel(alert?.zoneId);
+}
+
+function getAlertSourceSubLabel(alert) {
+  if (alert?.sensorId && !String(alert.sensorId).startsWith("zoneavg#")) {
+    return `${getMetricLabel(alert.metric || alert.sensorType)} sensor`;
+  }
+
+  return `${getMetricLabel(alert.metric || alert.sensorType)} rule`;
+}
+
+function getAlertTitle(alert) {
+  const severityText = alert?.severityLabel || capitalizeWords(alert?.severity) || "Alert";
+  const metricText = getMetricLabel(alert?.metric || alert?.sensorType);
+  const zoneText = getZoneLabel(alert?.zoneId);
+
+  if (alert?.sensorId && !String(alert.sensorId).startsWith("zoneavg#")) {
+    return `${severityText} ${metricText} Alert`;
+  }
+
+  return `${zoneText} ${metricText} Alert`;
+}
+
+function getAlertMessage(alert) {
+  const readingText =
+    alert?.reading !== null && alert?.reading !== undefined && alert?.unit
+      ? `${alert.reading} ${alert.unit}`
+      : alert?.reading !== null && alert?.reading !== undefined
+        ? `${alert.reading}`
+        : null;
+
+  const baseMessage = alert?.message || "An active environmental alert requires operator review.";
+
+  if (readingText) {
+    return `${baseMessage} Current reading: ${readingText}.`;
+  }
+
+  return baseMessage;
+}
+
+function updateAlertUiState() {
+  const hasActiveAlerts = activeAlerts.length > 0;
+
+  if (operatorActionBanner) {
+    operatorActionBanner.hidden = !hasActiveAlerts;
+    operatorActionBanner.classList.toggle("isActive", hasActiveAlerts);
+  }
+
+  if (viewAllAlertsButton) {
+    viewAllAlertsButton.classList.toggle("isUrgent", hasActiveAlerts);
+  }
+
+  if (activeAlertsCount) {
+    activeAlertsCount.textContent = String(activeAlerts.length);
+  }
+}
+
+function renderActiveAlertsTable() {
+  if (!alertsTableBody) {
+    return;
+  }
+
+  if (!activeAlerts.length) {
+    alertsTableBody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="alertMessageCell">
+            No active Hamilton alerts at this time.
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  alertsTableBody.innerHTML = activeAlerts
+    .map((alert) => {
+      const sourceLabel = getAlertSourceLabel(alert);
+      const sourceSubLabel = getAlertSourceSubLabel(alert);
+      const readingValue =
+        alert?.reading !== null && alert?.reading !== undefined
+          ? `${alert.reading} ${alert.unit || ""}`.trim()
+          : "N/A";
+
+      const timeValue = alert?.triggeredAt || alert?.updatedAt;
+
+      return `
+        <tr data-alert-id="${escapeHtml(alert.alertId || "")}">
+          <td>
+            <span class="alertSeverityBadge ${getSeverityBadgeClass(alert)}">
+              ${escapeHtml(getSeverityLabel(alert))}
+            </span>
+          </td>
+
+          <td>${escapeHtml(getZoneLabel(alert.zoneId))}</td>
+
+          <td>
+            <div class="alertSourceCell">
+              <strong>${escapeHtml(sourceLabel)}</strong>
+              <span>${escapeHtml(sourceSubLabel)}</span>
+            </div>
+          </td>
+
+          <td>
+            <div class="alertReadingCell">
+              <strong>${escapeHtml(readingValue)}</strong>
+              <span>latest active reading</span>
+            </div>
+          </td>
+
+          <td>
+            <div class="alertMessageCell">
+              ${escapeHtml(alert.message || "An active alert requires operator attention.")}
+            </div>
+          </td>
+
+          <td>
+            <div class="alertTimeCell">
+              <strong>${escapeHtml(formatAlertTime(timeValue))}</strong>
+              <span>${escapeHtml(formatAlertDate(timeValue))}</span>
+            </div>
+          </td>
+<td>
+  <div class="alertActionButtons">
+    <button
+      type="button"
+      class="alertActionButton"
+      data-action="acknowledge"
+      data-alert-id="${escapeHtml(alert.alertId || "")}"
+      ${alert.status === "acknowledged" ? "disabled" : ""}
+    >
+      ${alert.status === "acknowledged" ? "Acknowledged" : "Acknowledge"}
+    </button>
+
+    <button
+      type="button"
+      class="alertActionButton isResolve"
+      data-action="resolve"
+      data-alert-id="${escapeHtml(alert.alertId || "")}"
+      ${alert.status === "resolved" ? "disabled" : ""}
+    >
+      ${alert.status === "resolved" ? "Resolved" : "Mark Resolved"}
+    </button>
+
+            <button
+            type="button"
+            class="alertActionButton isPublic"
+            data-action="toggle-public"
+            data-alert-id="${escapeHtml(alert.alertId || "")}"
+            data-is-public="${alert.isPublic ? "true" : "false"}"
+            >
+            ${alert.isPublic ? "Remove from Public" : "Make Public"}
+            </button>
+        </div>
+        </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+async function handleAlertsTableClick(event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) {
+    return;
+  }
+
+  const alertId = button.dataset.alertId;
+  const action = button.dataset.action;
+
+  if (!alertId) {
+    return;
+  }
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "Updating...";
+
+  try {
+    if (action === "acknowledge") {
+      await updateAlertStatusApi(alertId, "acknowledged");
+    } else if (action === "resolve") {
+      await updateAlertStatusApi(alertId, "resolved");
+    } else if (action === "toggle-public") {
+      const isCurrentlyPublic = button.dataset.isPublic === "true";
+      await toggleAlertPublicApi(alertId, !isCurrentlyPublic);
+    }
+
+    await loadAndRenderOperatorPage();
+  } catch (error) {
+    console.error("Alert action failed:", error);
+    alert("Failed to update alert. Check the console and API response.");
+    button.disabled = false;
+    button.textContent = originalText;
+  }
 }
 
 function calculateAverage(values) {
@@ -216,41 +520,6 @@ function getZoneOverallStatus(zone) {
   };
 }
 
-function renderAlerts() {
-  if (!alertsRow || !operatorCityData) {
-    return;
-  }
-
-  const alerts = Array.isArray(operatorCityData.alerts)
-    ? operatorCityData.alerts
-    : [];
-
-  if (!alerts.length) {
-    alertsRow.innerHTML = "";
-    return;
-  }
-
-  alertsRow.innerHTML = alerts
-    .slice(0, 2)
-    .map((alert) => {
-      const severityClass = getAlertSeverityClass(alert.severity);
-      const cardClass = getAlertCardClass(alert.severity);
-
-      return `
-        <article class="alertCard ${cardClass}">
-          <div class="alertCardTop">
-            <span class="alertBadge ${severityClass}">${alert.severity.toUpperCase()}</span>
-            <span class="alertTime">${formatAlertTime(alert.timestamp)}</span>
-          </div>
-
-          <h3 class="alertTitle">${alert.title}</h3>
-          <p class="alertText">${alert.message}</p>
-        </article>
-      `;
-    })
-    .join("");
-}
-
 function getLatestReading(sensor) {
   if (!sensor.readings.length) {
     return null;
@@ -349,13 +618,8 @@ function getOperatorZoneMetricsPage(zone, metricKey) {
   return `operator-zone-metrics.html?city=${operatorCityData.cityId}&zone=${zone.id}&metric=${metricKey}`;
 }
 
-function getMetricLabel(metricKey) {
-  const metric = metricDefinitions.find((item) => item.key === metricKey);
-  return metric ? metric.label : metricKey;
-}
-
 function renderMapMarkers() {
-  if (!mapMarkers) {
+  if (!mapMarkers || !operatorCityData) {
     return;
   }
 
@@ -404,7 +668,7 @@ function renderMapMarkers() {
 }
 
 function renderZones() {
-  if (!zoneList) {
+  if (!zoneList || !operatorCityData) {
     return;
   }
 
@@ -434,16 +698,18 @@ function renderZones() {
               <p class="metricMeta">5-minute average</p>
               <p class="metricSensorCount">${sensors.length} sensor${sensors.length === 1 ? "" : "s"} in this zone</p>
 
-            <a
-            class="metricLink"
-            href="${getOperatorZoneMetricsPage(zone, metric.key)}"
-            >
-            View Details
-            </a>
+              <a
+                class="metricLink"
+                href="${getOperatorZoneMetricsPage(zone, metric.key)}"
+              >
+                View Details
+              </a>
             </article>
           `;
         })
         .join("");
+
+      const zoneStatus = getZoneOverallStatus(zone);
 
       return `
         <section class="zoneCard">
@@ -463,17 +729,45 @@ function renderZones() {
     .join("");
 }
 
+async function loadAndRenderOperatorPage() {
+  const params = new URLSearchParams(window.location.search);
+  const cityId = params.get("city") || "hamilton";
+
+  const [cityData, alerts] = await Promise.all([
+    fetchOperatorCityData(cityId, 60),
+    getAlertsApi(cityId)
+  ]);
+
+  operatorCityData = cityData;
+  activeAlerts = Array.isArray(alerts) ? alerts : [];
+
+  updateAlertUiState();
+  renderActiveAlertsTable();
+  renderMapMarkers();
+  renderZones();
+
+  console.log("Operator page loaded", {
+    cityId,
+    activeAlertsCount: activeAlerts.length,
+    activeAlerts
+  });
+}
+
+if (alertsTableBody) {
+  alertsTableBody.addEventListener("click", handleAlertsTableClick);
+}
 
 async function initOperatorPage() {
   try {
-    const params = new URLSearchParams(window.location.search);
-    const cityId = params.get("city") || "hamilton";
+    await loadAndRenderOperatorPage();
 
-    operatorCityData = await fetchOperatorCityData(cityId, 60);
-
-    renderAlerts();
-    renderMapMarkers();
-    renderZones();
+    setInterval(async () => {
+      try {
+        await loadAndRenderOperatorPage();
+      } catch (error) {
+        console.error("Failed to refresh operator page:", error);
+      }
+    }, 60000);
   } catch (error) {
     console.error("Failed to initialize operator page:", error);
   }

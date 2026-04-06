@@ -11,6 +11,13 @@ export const metricConfig = {
   noiseLevel: { label: "Noise Level", unit: "dB" }
 };
 
+import {
+  getRulesApi,
+  createRuleApi,
+  updateRuleApi,
+  deleteRuleApi
+} from "./adminApi.js";
+
 const severityOrder = ["mild", "moderate", "severe"];
 
 const defaultRules = [

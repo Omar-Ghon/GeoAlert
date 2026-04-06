@@ -1,22 +1,24 @@
 import {
-  createRule,
-  deleteRule,
-  evaluateRulesAgainstCurrentData,
   formatLevelsSummary,
   formatRuleEvaluation,
   getAdminCities,
-  getAuditEntries,
   getCityData,
   getMetrics,
-  getRuleById,
-  getRuleStats,
-  getRules,
-  getTriggeredAlerts,
   getZones,
-  metricConfig,
-  seedDefaultRules,
-  updateRule
+  metricConfig
 } from "./adminAlerts.js";
+
+import {
+  getRulesApi,
+  createRuleApi,
+  updateRuleApi,
+  deleteRuleApi,
+  getAlertsApi
+} from "./adminApi.js";
+
+let currentRules = [];
+let currentTriggeredAlerts = [];
+let currentAuditEntries = [];
 
 const accountMenuButton = document.getElementById("accountMenuButton");
 const accountDropdown = document.getElementById("accountDropdown");
@@ -64,17 +66,15 @@ function updateCityUi(selectedCityId = getSelectedCityId()) {
 
 initializeAdminPage();
 
-function initializeAdminPage() {
-  seedDefaultRules();
+async function initializeAdminPage() {
   populateCityOptions();
   populateZoneOptions(getSelectedCityId());
   populateMetricOptions();
-  evaluateRulesAgainstCurrentData();
   updateCityUi(getSelectedCityId());
-  renderAll();
   setupAccountMenu();
   setupEventListeners();
   resetFormState();
+  await renderAllFromApi();
 }
 
 function setupAccountMenu() {
@@ -113,35 +113,32 @@ function setupEventListeners() {
     });
   }
 
-  if (resetRulesButton) {
-    resetRulesButton.addEventListener("click", () => {
-      localStorage.removeItem("geoAlertAdminRules");
-      localStorage.removeItem("geoAlertTriggeredAlerts");
-      localStorage.removeItem("geoAlertAdminAudit");
-      seedDefaultRules(true);
-      resetFormState();
-      renderAll();
-      showFeedback("Demo rules were reset successfully.", "success");
-    });
-  }
+if (resetRulesButton) {
+  resetRulesButton.addEventListener("click", () => {
+    resetFormState();
+    clearFeedback();
+    showFeedback("Demo reset is disabled in AWS mode.", "success");
+  });
+}
 
 if (runEvaluationButton) {
-  runEvaluationButton.addEventListener("click", () => {
-    const selectedCityId = getSelectedCityId();
-    const selectedCity = getCityData(selectedCityId);
-
-    evaluateRulesAgainstCurrentData();
-    renderAll();
-    showFeedback(`Alert evaluation completed against the current ${selectedCity.cityName} data.`, "success");
+  runEvaluationButton.addEventListener("click", async () => {
+    try {
+      await renderAllFromApi();
+      showFeedback("Rules refreshed from AWS successfully.", "success");
+    } catch (error) {
+      console.error("refresh error:", error);
+      showFeedback(error.message || "Failed to refresh rules.", "error");
+    }
   });
 }
 
 if (cityIdSelect) {
-  cityIdSelect.addEventListener("change", () => {
+  cityIdSelect.addEventListener("change", async () => {
     const selectedCityId = cityIdSelect.value;
     populateZoneOptions(selectedCityId);
     updateCityUi(selectedCityId);
-    renderSummary();
+    await renderAllFromApi();
   });
 }
 
@@ -175,7 +172,7 @@ function populateMetricOptions() {
     .join("");
 }
 
-function handleRuleSubmit(event) {
+async function handleRuleSubmit(event) {
   event.preventDefault();
   clearFeedback();
 
@@ -189,17 +186,21 @@ function handleRuleSubmit(event) {
 
   const editingRuleId = editingRuleIdInput.value.trim();
 
-  if (editingRuleId) {
-    updateRule(editingRuleId, payload);
-    showFeedback("Rule updated successfully.", "success");
-  } else {
-    createRule(payload);
-    showFeedback("Alert rule created successfully.", "success");
-  }
+  try {
+    if (editingRuleId) {
+      await updateRuleApi(editingRuleId, payload);
+      showFeedback("Rule updated successfully.", "success");
+    } else {
+      await createRuleApi(payload);
+      showFeedback("Alert rule created successfully.", "success");
+    }
 
-  evaluateRulesAgainstCurrentData();
-  renderAll();
-  resetFormState();
+    await renderAllFromApi();
+    resetFormState();
+  } catch (error) {
+    console.error("handleRuleSubmit error:", error);
+    showFeedback(error.message || "Failed to save rule.", "error");
+  }
 }
 
 function buildRulePayloadFromForm() {
@@ -261,7 +262,7 @@ function validateRulePayload(payload) {
   return null;
 }
 
-function handleRulesTableActions(event) {
+async function handleRulesTableActions(event) {
   const editButton = event.target.closest("[data-action='edit']");
   const deleteButton = event.target.closest("[data-action='delete']");
 
@@ -273,19 +274,25 @@ function handleRulesTableActions(event) {
 
   if (deleteButton) {
     const ruleId = deleteButton.dataset.ruleId;
-    deleteRule(ruleId);
-    evaluateRulesAgainstCurrentData();
-    renderAll();
-    resetFormState();
-    showFeedback("Rule deleted.", "success");
+
+    try {
+      await deleteRuleApi(ruleId);
+      await renderAllFromApi();
+      resetFormState();
+      showFeedback("Rule deleted.", "success");
+    } catch (error) {
+      console.error("delete rule error:", error);
+      showFeedback(error.message || "Failed to delete rule.", "error");
+    }
   }
 }
 
+
 function startEditingRule(ruleId) {
-  const rule = getRuleById(ruleId);
+  const rule = currentRules.find((item) => item.ruleId === ruleId);
   if (!rule) return;
 
-  editingRuleIdInput.value = rule.id;
+  editingRuleIdInput.value = rule.ruleId;
   document.getElementById("ruleName").value = rule.ruleName;
   cityIdSelect.value = rule.cityId || "hamilton";
   populateZoneOptions(cityIdSelect.value);
@@ -351,32 +358,26 @@ function resetFormState() {
   clearFeedback();
 }
 
-function renderAll() {
-  renderSummary();
-  renderRulesTable();
-  renderTriggeredAlerts();
-  renderAuditLog();
-}
-
 function renderSummary() {
   const selectedCityId = getSelectedCityId();
-  const stats = getRuleStats(selectedCityId);
+  const cityData = getCityData(selectedCityId);
+  const zones = getZones(selectedCityId);
 
-  summaryCity.textContent = stats.cityName;
-  summaryZones.textContent = String(stats.zoneCount);
-  summaryRules.textContent = String(stats.activeRules);
-  summaryTriggered.textContent = String(stats.triggeredAlerts);
+  summaryCity.textContent = cityData.cityName;
+  summaryZones.textContent = String(zones.length);
+  summaryRules.textContent = String(currentRules.length);
+  summaryTriggered.textContent = String(currentTriggeredAlerts.length);
 
   updateCityUi(selectedCityId);
 }
 
 function renderRulesTable() {
-  const rules = getRules();
+  const rules = currentRules;
 
   if (!rules.length) {
     rulesTableBody.innerHTML = `
       <tr>
-        <td colspan="6">
+        <td colspan="7">
           <p class="emptyState">No rules created yet.</p>
         </td>
       </tr>
@@ -384,52 +385,52 @@ function renderRulesTable() {
     return;
   }
 
-rulesTableBody.innerHTML = rules
-  .map((rule) => `
-    <tr>
-      <td>
-        <div class="ruleNameCell">
-          <strong>${escapeHtml(rule.ruleName)}</strong>
-        </div>
-      </td>
-      <td>${escapeHtml(rule.cityName || "Hamilton")}</td>
-      <td>${escapeHtml(getZoneLabel(rule.zoneId, rule.cityId || "hamilton"))}</td>
-      <td>${escapeHtml(metricConfig[rule.metric]?.label ?? rule.metric)}</td>
-      <td>${formatRuleEvaluation(rule)}</td>
-      <td>${formatLevelsSummary(rule)}</td>
-      <td>
-        <div class="ruleActionGroup">
-          <button
-            type="button"
-            class="smallButton"
-            data-action="edit"
-            data-rule-id="${rule.id}"
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            class="smallButton danger"
-            data-action="delete"
-            data-rule-id="${rule.id}"
-          >
-            Delete
-          </button>
-        </div>
-      </td>
-    </tr>
-  `)
-  .join("");
+  rulesTableBody.innerHTML = rules
+    .map((rule) => `
+      <tr>
+        <td>
+          <div class="ruleNameCell">
+            <strong>${escapeHtml(rule.ruleName)}</strong>
+          </div>
+        </td>
+        <td>${escapeHtml(getCityData(rule.cityId || "hamilton").cityName)}</td>
+        <td>${escapeHtml(getZoneLabel(rule.zoneId, rule.cityId || "hamilton"))}</td>
+        <td>${escapeHtml(metricConfig[rule.metric]?.label ?? rule.metric)}</td>
+        <td>${formatRuleEvaluation(rule)}</td>
+        <td>${formatLevelsSummary(rule)}</td>
+        <td>
+          <div class="ruleActionGroup">
+            <button
+              type="button"
+              class="smallButton"
+              data-action="edit"
+              data-rule-id="${rule.ruleId}"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              class="smallButton danger"
+              data-action="delete"
+              data-rule-id="${rule.ruleId}"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `)
+    .join("");
 }
 
 function renderTriggeredAlerts() {
-  const alerts = getTriggeredAlerts();
+  const alerts = currentTriggeredAlerts;
 
   if (!alerts.length) {
     triggeredAlertsBody.innerHTML = `
       <tr>
         <td colspan="6">
-          <p class="emptyState">No alerts are currently triggered by the active rules.</p>
+          <p class="emptyState">No alerts are currently active.</p>
         </td>
       </tr>
     `;
@@ -445,10 +446,10 @@ function renderTriggeredAlerts() {
             <span class="ruleSubtext">${escapeHtml(alert.message)}</span>
           </div>
         </td>
-        <td>${escapeHtml(alert.zoneName)}</td>
-        <td>${escapeHtml(alert.metricLabel)}</td>
+        <td>${escapeHtml(getZoneLabel(alert.zoneId, alert.cityId || "hamilton"))}</td>
+        <td>${escapeHtml(metricConfig[alert.metric]?.label ?? alert.metric)}</td>
         <td><span class="badge ${alert.severity}">${escapeHtml(alert.severityLabel)}</span></td>
-        <td>${alert.reading} ${alert.unit}</td>
+        <td>${alert.reading} ${escapeHtml(alert.unit)}</td>
         <td><span class="badge active">${capitalize(alert.status)}</span></td>
       </tr>
     `)
@@ -456,27 +457,13 @@ function renderTriggeredAlerts() {
 }
 
 function renderAuditLog() {
+  currentAuditEntries = [];
+
   if (!auditLog) return;
 
-  const entries = getAuditEntries();
-
-  if (!entries.length) {
-    auditLog.innerHTML = `<p class="emptyState">No audit entries recorded yet.</p>`;
-    return;
-  }
-
-  auditLog.innerHTML = entries
-    .map((entry) => `
-      <article class="auditItem">
-        <div class="auditTop">
-          <p class="auditAction">${entry.action}</p>
-          <span class="auditTime">${formatTimestamp(entry.timestamp)}</span>
-        </div>
-        <p class="auditText">${entry.details}</p>
-      </article>
-    `)
-    .join("");
+  auditLog.innerHTML = `<p class="emptyState">No AWS-backed audit entries yet.</p>`;
 }
+
 
 function getZoneLabel(zoneId, cityId = "hamilton") {
   if (zoneId === "all-zones") return "All Zones";
@@ -519,4 +506,22 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+async function renderAllFromApi() {
+  await loadRulesFromApi();
+  await loadAlertsFromApi();
+  renderRulesTable();
+  renderTriggeredAlerts();
+  renderAuditLog();
+  renderSummary();
+}
+async function loadRulesFromApi() {
+  const selectedCityId = getSelectedCityId();
+  currentRules = await getRulesApi(selectedCityId);
+}
+
+async function loadAlertsFromApi() {
+  const selectedCityId = getSelectedCityId();
+  currentTriggeredAlerts = await getAlertsApi(selectedCityId);
 }
