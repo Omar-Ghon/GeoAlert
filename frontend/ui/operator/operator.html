@@ -46,81 +46,96 @@
           <p class="operatorSubheading">Hamilton monitoring overview</p>
         </div>
 
-        <a href="alerts.html" class="viewAllAlertsButton">View All Alerts</a>
+        <a href="operator-alerts.html" class="viewAllAlertsButton isUrgent">
+          View All Alerts
+        </a>
       </div>
 
-      <section class="alertsRow" id="alertsRow"></section>
+      <section class="operatorActionBanner isActive" hidden aria-live="polite">
+        <div class="operatorActionBannerContent">
+          <p class="operatorActionBannerEyebrow">Active Hamilton alert detected</p>
+          <h3 class="operatorActionBannerTitle">ALERT! ACTION REQUIRED!</h3>
+          <p class="operatorActionBannerText">
+            One or more active environmental alerts require operator review. Open the alert queue to acknowledge, resolve, or prepare a public update.
+          </p>
+        </div>
+
+        <div class="operatorActionBannerActions">
+          <a href="operator-alerts.html" class="operatorActionBannerButton">
+            Review Active Alerts
+          </a>
+        </div>
+      </section>
+
+      <!-- <section class="alertsRow" id="alertsRow"></section> -->
 
       <section class="mapPanel">
         <div class="mapPanelHeader">
-        <div>
+          <div>
             <h3 class="mapPanelTitle">Hamilton Sensor Map</h3>
             <p class="mapPanelText">
-            Hover over a sensor marker to view its latest reading and open its detail page.
+              Hover over a sensor marker to view its latest reading and open its detail page.
             </p>
-        </div>
+          </div>
 
-        <div class="mapLegend">
+          <div class="mapLegend">
             <div class="mapLegendSection">
-            <p class="mapLegendTitle">Sensor Type</p>
-            <div class="mapLegendItems">
+              <p class="mapLegendTitle">Sensor Type</p>
+              <div class="mapLegendItems">
                 <div class="mapLegendItem">
-                <span class="mapLegendLetter">A</span>
-                <span class="mapLegendLabel">Air Quality</span>
+                  <span class="mapLegendLetter">A</span>
+                  <span class="mapLegendLabel">Air Quality</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendLetter">T</span>
-                <span class="mapLegendLabel">Temperature</span>
+                  <span class="mapLegendLetter">T</span>
+                  <span class="mapLegendLabel">Temperature</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendLetter">H</span>
-                <span class="mapLegendLabel">Humidity</span>
+                  <span class="mapLegendLetter">H</span>
+                  <span class="mapLegendLabel">Humidity</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendLetter">N</span>
-                <span class="mapLegendLabel">Noise</span>
+                  <span class="mapLegendLetter">N</span>
+                  <span class="mapLegendLabel">Noise</span>
                 </div>
-            </div>
+              </div>
             </div>
 
             <div class="mapLegendSection">
-            <p class="mapLegendTitle">Severity</p>
-            <div class="mapLegendItems">
+              <p class="mapLegendTitle">Severity</p>
+              <div class="mapLegendItems">
                 <div class="mapLegendItem">
-                <span class="mapLegendSwatch isNormal"></span>
-                <span class="mapLegendLabel">Normal</span>
+                  <span class="mapLegendSwatch isNormal"></span>
+                  <span class="mapLegendLabel">Normal</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendSwatch isUnavailable"></span>
-                <span class="mapLegendLabel">Unavailable / Offline</span>
+                  <span class="mapLegendSwatch isUnavailable"></span>
+                  <span class="mapLegendLabel">Unavailable / Offline</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendSwatch isElevated"></span>
-                <span class="mapLegendLabel">Elevated</span>
+                  <span class="mapLegendSwatch isElevated"></span>
+                  <span class="mapLegendLabel">Elevated</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendSwatch isHigh"></span>
-                <span class="mapLegendLabel">High</span>
+                  <span class="mapLegendSwatch isHigh"></span>
+                  <span class="mapLegendLabel">High</span>
                 </div>
                 <div class="mapLegendItem">
-                <span class="mapLegendSwatch isCritical"></span>
-                <span class="mapLegendLabel">Critical</span>
+                  <span class="mapLegendSwatch isCritical"></span>
+                  <span class="mapLegendLabel">Critical</span>
                 </div>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
-        </div>
-
-        
 
         <div class="mapCanvas" id="mapCanvas">
-        <img
+          <img
             src="../../assets/images/hamilton-map.png"
             alt="Hamilton map"
             class="mapImage"
-        >
-
-        <div class="mapMarkers" id="mapMarkers"></div>
+          >
+          <div class="mapMarkers" id="mapMarkers"></div>
         </div>
       </section>
 
