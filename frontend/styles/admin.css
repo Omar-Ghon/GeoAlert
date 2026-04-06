@@ -97,7 +97,7 @@ body {
 .siteHeader.adminHeader .accountMenuChevron {
   font-size: 1.1rem;
   line-height: 1;
-  transform: translateY(-1px);
+  transform: translateY(-5px);
 }
 .siteHeader.adminHeader .accountDropdown {
   position: absolute;

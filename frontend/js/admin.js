@@ -49,7 +49,7 @@ const summaryCity = document.getElementById("summaryCity");
 const summaryZones = document.getElementById("summaryZones");
 const summaryRules = document.getElementById("summaryRules");
 const summaryTriggered = document.getElementById("summaryTriggered");
-const accountMenuUsername = document.getElementById("accountMenuUsername");
+// const accountMenuUsername = document.getElementById("accountMenuUsername");
 const adminSubheading = document.getElementById("adminSubheading");
 
 function getCityFromUrl() {
@@ -112,9 +112,9 @@ function updateCityUi(selectedCityId = getSelectedCityId()) {
     summaryCity.textContent = cityData.cityName;
   }
 
-  if (accountMenuUsername) {
-    accountMenuUsername.textContent = `${cityData.cityName} Admin`;
-  }
+//   if (accountMenuUsername) {
+//     accountMenuUsername.textContent = `${cityData.cityName} Admin`;
+//   }
 
   if (adminSubheading) {
     adminSubheading.textContent = `Create and manage ${cityData.cityName} alert rules using zone-based thresholds.`;

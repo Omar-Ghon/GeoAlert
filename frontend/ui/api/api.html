@@ -1,273 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GeoAlert API</title>
-  <link rel="stylesheet" href="api.css">
+  <link rel="stylesheet" href="../../styles/api.css" />
 </head>
 <body>
-
-<main class="apiPage">
-  <section class="apiShell">
-    <a href="../../index.html" class="backButton">← Back</a>
-    <div class="apiHero">
-      <div class="apiHeroContent">
-        <p class="apiEyebrow">Developer Documentation</p>
-        <h2 class="apiHeading">GeoAlert Public API</h2>
-        <p class="apiLead">
-          The GeoAlert Public API provides read-only access to aggregated, non-sensitive
-          environmental monitoring data for public dashboards, third-party apps, and
-          digital signage integrations.
-        </p>
-      </div>
-
-      <div class="apiHeroMeta">
-        <div class="apiMetaCard">
-          <span class="apiMetaLabel">Version</span>
-          <span class="apiMetaValue">v1</span>
-        </div>
-        <div class="apiMetaCard">
-          <span class="apiMetaLabel">Protocol</span>
-          <span class="apiMetaValue">REST / JSON</span>
-        </div>
-        <div class="apiMetaCard">
-          <span class="apiMetaLabel">Access</span>
-          <span class="apiMetaValue">Read-Only</span>
-        </div>
-      </div>
+  <header class="apiHeader">
+    <div class="apiHeaderLeft">
+      <a href="../../../index.html" class="apiLogoLink" aria-label="GeoAlert home">
+        <img src="../../assets/icons/logo.png" alt="GeoAlert logo" class="apiLogoImage" />
+      </a>
     </div>
 
-    <section class="apiSection">
-      <div class="apiSectionHeader">
-        <h3 class="apiSectionTitle">Base URL</h3>
-      </div>
+    <div class="apiHeaderCenter">
+      <h1 class="apiBrandTitle">GeoAlert Public API</h1>
+    </div>
 
-      <div class="apiCodeBlock">
-        <code>https://api.geoalert.city/v1</code>
-      </div>
+    <div class="apiHeaderRight">
+      <a href="../../../index.html" class="apiBackLink">Back to Home</a>
+    </div>
+  </header>
+
+  <main class="apiPage">
+    <section class="apiHero">
+      <p class="apiEyebrow">Developer Access</p>
+      <h2 class="apiHeroTitle">Environmental data and alert access for cities</h2>
+      <p class="apiHeroText">
+        Use these endpoints to retrieve aggregated operator data, read public alerts,
+        and subscribe external systems to public alert notifications.
+      </p>
     </section>
 
-    <section class="apiSection apiTwoColumn">
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Authentication</h3>
-        <p class="apiCardText">
-          Third-party developers can request an API key and include it in the request header.
-          Public browser demos may use mock keys during development.
-        </p>
-        <div class="apiCodeBlock">
-          <code>x-api-key: YOUR_API_KEY</code>
+    <section class="apiGrid">
+      <article class="apiCard">
+        <div class="apiCardTop">
+          <span class="apiMethod apiMethodGet">GET</span>
+          <code class="apiPath">/api/operator?cityId=hamilton&amp;minutes=60</code>
         </div>
-      </div>
-
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Rate Limiting</h3>
+        <h3 class="apiCardTitle">City Aggregated Metrics</h3>
         <p class="apiCardText">
-          The public API is rate-limited to protect availability and reduce scraping or abuse.
-          Example limit: 60 requests per minute per API key.
+          Returns aggregated city/operator data for the selected time window.
+          Use this for dashboards, zone summaries, and sensor metric rollups.
         </p>
-        <div class="apiCodeBlock">
-          <code>429 Too Many Requests</code>
+
+        <div class="apiExampleBlock">
+          <p class="apiExampleLabel">Example response fields</p>
+          <pre>{
+  "cityId": "hamilton",
+  "cityName": "Hamilton",
+  "zones": [...],
+  "metrics": [...],
+  "generatedAt": "2026-04-06T15:00:00.000Z"
+}</pre>
         </div>
-      </div>
-    </section>
 
-    <section class="apiSection">
-      <div class="apiSectionHeader">
-        <h3 class="apiSectionTitle">Available Endpoints</h3>
-        <p class="apiSectionSubtitle">
-          All endpoints return JSON. These examples are mocked for the project demo.
+        <div class="apiTryBlock">
+          <label class="apiLabel" for="operatorCity">City</label>
+          <select id="operatorCity" class="apiInput">
+            <option value="hamilton">Hamilton</option>
+            <option value="halton">Halton</option>
+            <option value="burlington">Burlington</option>
+            <option value="scarborough">Scarborough</option>
+          </select>
+
+          <label class="apiLabel" for="operatorMinutes">Minutes</label>
+          <input id="operatorMinutes" class="apiInput" type="number" min="1" value="60" />
+
+          <button id="testOperatorBtn" class="apiButton" type="button">Try endpoint</button>
+        </div>
+      </article>
+
+      <article class="apiCard">
+        <div class="apiCardTop">
+          <span class="apiMethod apiMethodGet">GET</span>
+          <code class="apiPath">/api/alertsystem/public-alerts?cityId=hamilton</code>
+        </div>
+        <h3 class="apiCardTitle">Public Alerts</h3>
+        <p class="apiCardText">
+          Returns public-facing active alerts only. Use this for public websites,
+          partner systems, mobile apps, and third-party dashboards.
         </p>
-      </div>
 
-      <div class="endpointList">
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/zones</code>
-          </div>
-          <p class="endpointDescription">
-            Returns all supported monitoring zones available through the public API.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>[
-  {
-    "id": "downtownCore",
-    "name": "Downtown Core"
-  },
-  {
-    "id": "westIndustrial",
-    "name": "West Industrial"
-  },
-  {
-    "id": "northResidential",
-    "name": "North Residential"
-  }
-]</code></pre>
-          </div>
-        </article>
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/zones/:zoneId/current</code>
-          </div>
-          <p class="endpointDescription">
-            Returns the latest aggregated environmental values for a single zone.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>{
-  "zoneId": "downtownCore",
-  "zoneName": "Downtown Core",
-  "updatedAt": "2026-03-31T10:42:00Z",
-  "metrics": {
-    "airQualityIndex": 72,
-    "temperatureC": 24,
-    "humidityPercent": 58,
-    "noiseDb": 81
-  }
-}</code></pre>
-          </div>
-        </article>
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/zones/:zoneId/history?metric=airQuality&amp;range=24h</code>
-          </div>
-          <p class="endpointDescription">
-            Returns historical aggregated data points for one metric within a requested time range.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>{
-  "zoneId": "downtownCore",
-  "metric": "airQuality",
-  "range": "24h",
-  "points": [
-    { "timestamp": "2026-03-31T06:00:00Z", "value": 61 },
-    { "timestamp": "2026-03-31T08:00:00Z", "value": 67 },
-    { "timestamp": "2026-03-31T10:00:00Z", "value": 72 }
+        <div class="apiExampleBlock">
+          <p class="apiExampleLabel">Example response fields</p>
+          <pre>{
+  "alerts": [
+    {
+      "alertId": "alert-123",
+      "cityId": "hamilton",
+      "zoneId": "central-hamilton",
+      "sensorType": "airQuality",
+      "severity": "severe",
+      "message": "Poor air quality detected."
+    }
   ]
-}</code></pre>
-          </div>
-        </article>
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/zones/:zoneId/aqi</code>
-          </div>
-          <p class="endpointDescription">
-            Returns the current Air Quality Index summary for a zone for quick public display.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>{
-  "zoneId": "downtownCore",
-  "aqi": 72,
-  "category": "Moderate",
-  "updatedAt": "2026-03-31T10:42:00Z"
-}</code></pre>
-          </div>
-        </article>
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/alerts/public</code>
-          </div>
-          <p class="endpointDescription">
-            Returns currently active public alerts that have already been acknowledged and published.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>[
-  {
-    "id": "alert-204",
-    "zoneId": "westIndustrial",
-    "type": "Air Quality",
-    "severity": "High",
-    "message": "Elevated particulate concentration detected.",
-    "status": "Active"
-  }
-]</code></pre>
-          </div>
-        </article>
-
-        <article class="endpointCard">
-          <div class="endpointTopRow">
-            <span class="endpointMethod">GET</span>
-            <code class="endpointPath">/health</code>
-          </div>
-          <p class="endpointDescription">
-            Returns a lightweight status response indicating API availability.
-          </p>
-          <div class="apiCodeBlock">
-<pre><code>{
-  "status": "ok",
-  "service": "GeoAlert Public API",
-  "version": "v1"
-}</code></pre>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <section class="apiSection apiTwoColumn">
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Example Request</h3>
-        <div class="apiCodeBlock">
-<pre><code>GET /v1/zones/downtownCore/current HTTP/1.1
-Host: api.geoalert.city
-x-api-key: demo_public_key_123</code></pre>
+}</pre>
         </div>
-      </div>
 
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Example Use Cases</h3>
-        <ul class="apiBulletList">
-          <li>Public environmental dashboards</li>
-          <li>Transit station or kiosk displays</li>
-          <li>Municipal open-data integrations</li>
-          <li>Student or research visualization tools</li>
-        </ul>
-      </div>
-    </section>
+        <div class="apiTryBlock">
+          <label class="apiLabel" for="publicAlertsCity">City</label>
+          <select id="publicAlertsCity" class="apiInput">
+            <option value="hamilton">Hamilton</option>
+            <option value="halton">Halton</option>
+            <option value="burlington">Burlington</option>
+            <option value="scarborough">Scarborough</option>
+          </select>
 
-    <section class="apiSection">
-      <div class="apiSectionHeader">
-        <h3 class="apiSectionTitle">Phone Alerts API</h3>
-        <p class="apiSectionSubtitle">
-          Send real-time SMS alerts to monitored environmental sensor thresholds.
+          <button id="testPublicAlertsBtn" class="apiButton" type="button">Try endpoint</button>
+        </div>
+      </article>
+
+      <article class="apiCard">
+        <div class="apiCardTop">
+          <span class="apiMethod apiMethodPost">POST</span>
+          <code class="apiPath">/api/subscriptions</code>
+        </div>
+        <h3 class="apiCardTitle">Subscribe to Public Alerts</h3>
+        <p class="apiCardText">
+          Register a subscriber for public alert notifications. This is the missing
+          backend piece you still need to add in AWS.
         </p>
-      </div>
 
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Overview</h3>
-        <p>The Phone Alerts API allows you to configure SMS notifications when sensor readings exceed preset thresholds. Receive immediate alerts when air quality, temperature, humidity, or noise levels reach critical or high warning states.</p>
-        
-        <div style="margin-top: 1rem;">
-          <a href="alerts-api.html" style="display: inline-block; padding: 0.75rem 1.5rem; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: 600;">
-            View Alerts API Documentation →
-          </a>
+        <div class="apiExampleBlock">
+          <p class="apiExampleLabel">Example request body</p>
+          <pre>{
+  "cityId": "hamilton",
+  "channel": "webhook",
+  "target": "https://example.com/webhooks/geoalert"
+}</pre>
         </div>
-      </div>
 
-      <div class="apiInfoCard">
-        <h3 class="apiCardTitle">Key Features</h3>
-        <ul class="apiBulletList">
-          <li>Real-time SMS notifications to user's phone</li>
-          <li>Customizable alert thresholds per metric</li>
-          <li>Multiple severity levels (High, Critical)</li>
-          <li>Zone-specific monitoring</li>
-          <li>Alert history and tracking</li>
-          <li>Duplicate alert prevention</li>
-          <li>Test SMS functionality</li>
-        </ul>
-      </div>
+        <div class="apiTryBlock">
+          <label class="apiLabel" for="subscribeCity">City</label>
+          <select id="subscribeCity" class="apiInput">
+            <option value="hamilton">Hamilton</option>
+            <option value="halton">Halton</option>
+            <option value="burlington">Burlington</option>
+            <option value="scarborough">Scarborough</option>
+          </select>
+
+          <label class="apiLabel" for="subscribeChannel">Channel</label>
+          <select id="subscribeChannel" class="apiInput">
+            <option value="webhook">webhook</option>
+            <option value="email">email</option>
+          </select>
+
+          <label class="apiLabel" for="subscribeTarget">Webhook URL or email</label>
+          <input
+            id="subscribeTarget"
+            class="apiInput"
+            type="text"
+            placeholder="https://example.com/webhook or name@example.com"
+          />
+
+          <button id="subscribeBtn" class="apiButton" type="button">Create subscription</button>
+        </div>
+      </article>
+
+      <article class="apiCard">
+        <div class="apiCardTop">
+          <span class="apiMethod apiMethodPost">POST</span>
+          <code class="apiPath">Alert notification payload</code>
+        </div>
+        <h3 class="apiCardTitle">Payload sent to subscribers</h3>
+        <p class="apiCardText">
+          When a public alert becomes active, GeoAlert should POST a payload like this
+          to each subscriber webhook for that city.
+        </p>
+
+        <div class="apiExampleBlock">
+          <p class="apiExampleLabel">Example notification payload</p>
+          <pre>{
+  "event": "public-alert-created",
+  "sentAt": "2026-04-06T15:05:00.000Z",
+  "alert": {
+    "alertId": "alert-123",
+    "cityId": "hamilton",
+    "zoneId": "central-hamilton",
+    "zoneName": "Central Hamilton",
+    "sensorType": "airQuality",
+    "severity": "severe",
+    "message": "Poor air quality detected.",
+    "status": "active",
+    "isPublic": true
+  }
+}</pre>
+        </div>
+      </article>
     </section>
-  </section>
-</main>
 
+    <section class="apiOutputSection">
+      <div class="apiOutputHeader">
+        <h2 class="apiOutputTitle">Response</h2>
+        <button id="clearOutputBtn" class="apiButton apiButtonSecondary" type="button">Clear</button>
+      </div>
+      <pre id="apiOutput" class="apiOutput">Run an endpoint test to see live data here.</pre>
+    </section>
+  </main>
+
+  <script type="module" src="../../js/api.js"></script>
 </body>
 </html>
