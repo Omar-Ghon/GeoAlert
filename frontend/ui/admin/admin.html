@@ -27,7 +27,7 @@
           aria-haspopup="true"
           aria-expanded="false"
         >
-          <span class="accountMenuUsername" id="accountMenuUsername">Hamilton Admin</span>
+          <span class="accountMenuUsername" id="accountMenuUsername">Admin</span>
           <span class="accountMenuChevron">⌄</span>
         </button>
 
@@ -43,14 +43,14 @@
       <div class="adminTopBar">
         <div class="adminHeadingWrap">
           <h2 class="adminHeading">Administrator Dashboard</h2>
-          <p class="adminSubheading">
-            Create and manage Hamilton alert rules using zone-based thresholds.
+          <p class="adminSubheading" id="adminSubheading">
+            Create and manage city alert rules using zone-based thresholds.
           </p>
         </div>
 
         <div class="adminTopBarActions">
-        <button class="secondaryButton" id="resetRulesButton" type="button">Clear Form</button>
-        <button class="primaryButton" id="runEvaluationButton" type="button">Refresh Rules</button>
+          <button class="secondaryButton" id="resetRulesButton" type="button">Clear Form</button>
+          <button class="primaryButton" id="runEvaluationButton" type="button">Refresh Rules</button>
         </div>
       </div>
 
@@ -76,273 +76,224 @@
         </article>
       </section>
 
-        <section class="panel createRulePanel">
-          <div class="panelHeader">
-            <div>
-              <h3 class="panelTitle">Create Alert Rule</h3>
-              <p class="panelText">
-                Define a threshold rule for a metric and choose how it should be evaluated.
-              </p>
+      <section class="panel createRulePanel">
+        <div class="panelHeader">
+          <div>
+            <h3 class="panelTitle">Create Alert Rule</h3>
+            <p class="panelText">
+              Define a threshold rule for a metric and choose how it should be evaluated.
+            </p>
+          </div>
+        </div>
+
+        <form class="ruleForm" id="ruleForm">
+          <input type="hidden" id="editingRuleId" name="editingRuleId">
+
+          <div class="formRow">
+            <div class="formField">
+              <label for="ruleName">Rule Name</label>
+              <input
+                id="ruleName"
+                name="ruleName"
+                type="text"
+                placeholder="Ex. Regional Heat Alert"
+                required
+              >
+            </div>
+
+            <div class="formField">
+              <label for="cityId">City</label>
+              <select id="cityId" name="cityId" required></select>
             </div>
           </div>
 
-        <form class="ruleForm" id="ruleForm">
-        <input type="hidden" id="editingRuleId" name="editingRuleId">
+          <div class="formRow">
+            <div class="formField">
+              <label for="zoneId">Zone</label>
+              <select id="zoneId" name="zoneId" required></select>
+            </div>
 
-        <div class="formRow">
-        <div class="formField">
-            <label for="ruleName">Rule Name</label>
-            <input
-            id="ruleName"
-            name="ruleName"
-            type="text"
-            placeholder="Ex. Hamilton Heat Alert"
-            required
-            >
-        </div>
+            <div class="formField">
+              <label for="metric">Metric</label>
+              <select id="metric" name="metric" required></select>
+            </div>
+          </div>
 
-        <div class="formField">
-            <label for="cityId">City</label>
-            <select id="cityId" name="cityId" required></select>
-        </div>
-        </div>
+          <div class="formRow">
+            <div class="formField">
+              <label for="evaluationType">Evaluation Type</label>
+              <select id="evaluationType" name="evaluationType" required>
+                <option value="zoneAverage">Zone Average</option>
+                <option value="singleSensor">Single Sensor</option>
+              </select>
+            </div>
 
-        <div class="formRow">
-        <div class="formField">
-            <label for="zoneId">Zone</label>
-            <select id="zoneId" name="zoneId" required></select>
-        </div>
+            <div class="formField">
+              <label for="comparison">Comparison</label>
+              <select id="comparison" name="comparison" required>
+                <option value="greaterThan">Greater Than</option>
+                <option value="lessThan">Less Than</option>
+              </select>
+            </div>
 
-        <div class="formField">
-            <label for="metric">Metric</label>
-            <select id="metric" name="metric" required></select>
-        </div>
-        </div>
+            <div class="formField">
+              <label for="window">Window</label>
+              <select id="window" name="window" required>
+                <option value="latest">Latest Reading</option>
+                <option value="fiveMinuteAverage">5-Minute Average</option>
+              </select>
+            </div>
+          </div>
 
-       <div class="formRow">
-        <div class="formField">
-        <label for="evaluationType">Evaluation Type</label>
-        <select id="evaluationType" name="evaluationType" required>
-            <option value="zoneAverage">Zone Average</option>
-            <option value="singleSensor">Single Sensor</option>
-        </select>
-        </div>
-
-        <div class="formField">
-        <label for="comparison">Comparison</label>
-        <select id="comparison" name="comparison" required>
-            <option value="greaterThan">Greater Than</option>
-            <option value="lessThan">Less Than</option>
-        </select>
-        </div>
-
-        <div class="formField">
-        <label for="window">Window</label>
-        <select id="window" name="window" required>
-            <option value="latest">Latest Reading</option>
-            <option value="fiveMinuteAverage">5-Minute Average</option>
-        </select>
-        </div>
-    </div>
-
-        <div class="alertLevelsSection">
+          <div class="alertLevelsSection">
             <div class="alertLevelCard">
-            <div class="alertLevelHeader">
+              <div class="alertLevelHeader">
                 <label class="alertLevelToggle">
-                <input type="checkbox" id="levelEnabledMild" name="levelEnabledMild">
-                <span>Enable Mild Level</span>
+                  <input type="checkbox" id="levelEnabledMild" name="levelEnabledMild">
+                  <span>Enable Mild Level</span>
                 </label>
-            </div>
+              </div>
 
-            <div class="formRow">
+              <div class="formRow">
                 <div class="formField">
-                <label for="levelLabelMild">Label</label>
-                <input id="levelLabelMild" name="levelLabelMild" type="text" value="Mild">
+                  <label for="levelLabelMild">Label</label>
+                  <input id="levelLabelMild" name="levelLabelMild" type="text" value="Mild">
                 </div>
 
                 <div class="formField">
-                <label for="levelThresholdMild">Threshold</label>
-                <input id="levelThresholdMild" name="levelThresholdMild" type="number" step="0.01" placeholder="Ex. 30">
+                  <label for="levelThresholdMild">Threshold</label>
+                  <input id="levelThresholdMild" name="levelThresholdMild" type="number" step="0.01" placeholder="Ex. 30">
                 </div>
-            </div>
+              </div>
 
-            <div class="formRow singleColumn">
+              <div class="formRow singleColumn">
                 <div class="formField">
-                <label for="levelMessageMild">Mild Alert Message</label>
-                <textarea id="levelMessageMild" name="levelMessageMild" rows="3" placeholder="Enter the mild alert message."></textarea>
+                  <label for="levelMessageMild">Mild Alert Message</label>
+                  <textarea id="levelMessageMild" name="levelMessageMild" rows="3" placeholder="Enter the mild alert message."></textarea>
                 </div>
-            </div>
+              </div>
             </div>
 
             <div class="alertLevelCard">
-            <div class="alertLevelHeader">
+              <div class="alertLevelHeader">
                 <label class="alertLevelToggle">
-                <input type="checkbox" id="levelEnabledModerate" name="levelEnabledModerate">
-                <span>Enable Moderate Level</span>
+                  <input type="checkbox" id="levelEnabledModerate" name="levelEnabledModerate">
+                  <span>Enable Moderate Level</span>
                 </label>
-            </div>
+              </div>
 
-            <div class="formRow">
+              <div class="formRow">
                 <div class="formField">
-                <label for="levelLabelModerate">Label</label>
-                <input id="levelLabelModerate" name="levelLabelModerate" type="text" value="Moderate">
+                  <label for="levelLabelModerate">Label</label>
+                  <input id="levelLabelModerate" name="levelLabelModerate" type="text" value="Moderate">
                 </div>
 
                 <div class="formField">
-                <label for="levelThresholdModerate">Threshold</label>
-                <input id="levelThresholdModerate" name="levelThresholdModerate" type="number" step="0.01" placeholder="Ex. 35">
+                  <label for="levelThresholdModerate">Threshold</label>
+                  <input id="levelThresholdModerate" name="levelThresholdModerate" type="number" step="0.01" placeholder="Ex. 35">
                 </div>
-            </div>
+              </div>
 
-            <div class="formRow singleColumn">
+              <div class="formRow singleColumn">
                 <div class="formField">
-                <label for="levelMessageModerate">Moderate Alert Message</label>
-                <textarea id="levelMessageModerate" name="levelMessageModerate" rows="3" placeholder="Enter the moderate alert message."></textarea>
+                  <label for="levelMessageModerate">Moderate Alert Message</label>
+                  <textarea id="levelMessageModerate" name="levelMessageModerate" rows="3" placeholder="Enter the moderate alert message."></textarea>
                 </div>
-            </div>
+              </div>
             </div>
 
             <div class="alertLevelCard">
-            <div class="alertLevelHeader">
+              <div class="alertLevelHeader">
                 <label class="alertLevelToggle">
-                <input type="checkbox" id="levelEnabledSevere" name="levelEnabledSevere">
-                <span>Enable Severe Level</span>
+                  <input type="checkbox" id="levelEnabledSevere" name="levelEnabledSevere">
+                  <span>Enable Severe Level</span>
                 </label>
-            </div>
+              </div>
 
-            <div class="formRow">
+              <div class="formRow">
                 <div class="formField">
-                <label for="levelLabelSevere">Label</label>
-                <input id="levelLabelSevere" name="levelLabelSevere" type="text" value="Severe">
+                  <label for="levelLabelSevere">Label</label>
+                  <input id="levelLabelSevere" name="levelLabelSevere" type="text" value="Severe">
                 </div>
 
                 <div class="formField">
-                <label for="levelThresholdSevere">Threshold</label>
-                <input id="levelThresholdSevere" name="levelThresholdSevere" type="number" step="0.01" placeholder="Ex. 40">
+                  <label for="levelThresholdSevere">Threshold</label>
+                  <input id="levelThresholdSevere" name="levelThresholdSevere" type="number" step="0.01" placeholder="Ex. 40">
                 </div>
-            </div>
+              </div>
 
-            <div class="formRow singleColumn">
+              <div class="formRow singleColumn">
                 <div class="formField">
-                <label for="levelMessageSevere">Severe Alert Message</label>
-                <textarea id="levelMessageSevere" name="levelMessageSevere" rows="3" placeholder="Enter the severe alert message."></textarea>
+                  <label for="levelMessageSevere">Severe Alert Message</label>
+                  <textarea id="levelMessageSevere" name="levelMessageSevere" rows="3" placeholder="Enter the severe alert message."></textarea>
                 </div>
+              </div>
             </div>
-            </div>
-        </div>
+          </div>
 
-        <div class="formActions">
+          <div class="formActions">
             <button class="primaryButton" type="submit" id="submitRuleButton">Create Rule</button>
             <button class="secondaryButton" type="button" id="clearFormButton">Clear</button>
             <button class="secondaryButton" type="button" id="cancelEditButton" hidden>Cancel Edit</button>
-        </div>
-
-        <p class="formFeedback" id="formFeedback" aria-live="polite"></p>
-        </form>
-        </section>
-
-        <!-- <section class="panel helperPanel">
-          <div class="panelHeader">
-            <div>
-              <h3 class="panelTitle">Admin Notes</h3>
-              <p class="panelText">
-                This version keeps the logic intentionally simple for the demo.
-              </p>
-            </div>
           </div>
 
-          <div class="helperList">
-            <article class="helperCard">
-              <h4>Zone First</h4>
-              <p>
-                Rules are tied to a zone because your project requirements emphasize predefined city zones and aggregated zone metrics.
-              </p>
-            </article>
-
-            <article class="helperCard">
-              <h4>Two Evaluation Modes</h4>
-              <p>
-                Use <strong>Zone Average</strong> for overall environmental conditions and <strong>Single Sensor</strong> for sudden spikes.
-              </p>
-            </article>
-
-            <article class="helperCard">
-              <h4>Stored Locally</h4>
-              <p>
-                Created rules, audit entries, and simulated triggered alerts are saved in localStorage so the page behaves like a small working prototype.
-              </p>
-            </article>
-          </div> -->
-        <!-- </section> -->
+          <p class="formFeedback" id="formFeedback" aria-live="polite"></p>
+        </form>
+      </section>
 
       <section class="panel rulesPanel">
         <div class="panelHeader">
-        <div>
+          <div>
             <h3 class="panelTitle">Configured Alert Rules</h3>
             <p class="panelText">
-            Edit or delete rules. Each rule can include any combination of mild, moderate, and severe thresholds.
+              Edit or delete rules. Each rule can include any combination of mild, moderate, and severe thresholds.
             </p>
-        </div>
+          </div>
         </div>
 
         <div class="tableWrap">
-        <table class="dataTable">
+          <table class="dataTable">
             <thead>
-            <tr>
-            <tr>
-            <th>Rule</th>
-            <th>City</th>
-            <th>Zone</th>
-            <th>Metric</th>
-            <th>Evaluation</th>
-            <th>Configured Levels</th>
-            <th>Actions</th>
-            </tr>
-            </tr>
+              <tr>
+                <th>Rule</th>
+                <th>City</th>
+                <th>Zone</th>
+                <th>Metric</th>
+                <th>Evaluation</th>
+                <th>Configured Levels</th>
+                <th>Actions</th>
+              </tr>
             </thead>
             <tbody id="rulesTableBody"></tbody>
-        </table>
+          </table>
         </div>
       </section>
 
-        <section class="panel triggeredPanel">
-          <div class="panelHeader">
-            <div>
-              <h3 class="panelTitle">Triggered Alerts</h3>
-                <p class="panelText">
-                Live AWS-backed alerts.
-                </p>
-            </div>
+      <section class="panel triggeredPanel">
+        <div class="panelHeader">
+          <div>
+            <h3 class="panelTitle">Triggered Alerts</h3>
+            <p class="panelText">
+              Live AWS-backed alerts.
+            </p>
           </div>
+        </div>
 
-          <div class="tableWrap">
-            <table class="dataTable">
-              <thead>
-                <tr>
-                  <th>Alert</th>
-                  <th>Zone</th>
-                  <th>Metric</th>
-                  <th>Severity</th>
-                  <th>Reading</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="triggeredAlertsBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- <section class="panel auditPanel">
-          <div class="panelHeader">
-            <div>
-              <h3 class="panelTitle">Audit Log</h3>
-              <p class="panelText">
-                Tracks important administrator actions for the prototype.
-              </p>
-            </div>
-          </div>
-
-          <div class="auditLog" id="auditLog"></div> -->
+        <div class="tableWrap">
+          <table class="dataTable">
+            <thead>
+              <tr>
+                <th>Alert</th>
+                <th>Zone</th>
+                <th>Metric</th>
+                <th>Severity</th>
+                <th>Reading</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="triggeredAlertsBody"></tbody>
+          </table>
+        </div>
       </section>
     </section>
   </main>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoAlert Operator Dashboard</title>
+  <link rel="stylesheet" href="../../styles/operator.css">
+</head>
+<body>
+  <header class="siteHeader operatorHeader">
+    <div class="siteHeaderLeft">
+      <a href="../../../index.html" class="siteHeaderLogo" aria-label="GeoAlert home">
+        <img src="../../assets/icons/logo.png" alt="GeoAlert logo">
+      </a>
+    </div>
+
+    <div class="siteHeaderCenter">
+      <h1 class="siteHeaderTitle">GeoAlert</h1>
+    </div>
+
+    <div class="siteHeaderRight">
+      <div class="accountMenu" id="accountMenu">
+        <button
+          class="accountMenuButton"
+          id="accountMenuButton"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <span class="accountMenuUsername">Halton Operator</span>
+          <span class="accountMenuChevron">⌄</span>
+        </button>
+
+        <div class="accountDropdown" id="accountDropdown">
+          <a href="../../../index.html" class="accountDropdownItem">Log out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="operatorPage">
+    <section class="operatorShell">
+      <div class="operatorTopBar">
+        <div class="operatorHeadingWrap">
+          <h2 class="operatorHeading">Operator Dashboard</h2>
+          <p class="operatorSubheading">Halton monitoring overview</p>
+        </div>
+
+        <a href="operator-alerts-halton.html" class="viewAllAlertsButton isUrgent">
+          View All Alerts
+        </a>
+      </div>
+
+      <section class="operatorActionBanner isActive" hidden aria-live="polite">
+        <div class="operatorActionBannerContent">
+          <p class="operatorActionBannerEyebrow">Active Halton alert detected</p>
+          <h3 class="operatorActionBannerTitle">ALERT! ACTION REQUIRED!</h3>
+          <p class="operatorActionBannerText">
+            One or more active environmental alerts require operator review. Open the alert queue to acknowledge, resolve, or prepare a public update.
+          </p>
+        </div>
+
+        <div class="operatorActionBannerActions">
+          <a href="operator-alerts-halton.html" class="operatorActionBannerButton">
+            Review Active Alerts
+          </a>
+        </div>
+      </section>
+
+      <!-- <section class="alertsRow" id="alertsRow"></section> -->
+
+      <section class="mapPanel">
+        <div class="mapPanelHeader">
+          <div>
+            <h3 class="mapPanelTitle">Halton Sensor Map</h3>
+            <p class="mapPanelText">
+              Hover over a sensor marker to view its latest reading and open its detail page.
+            </p>
+          </div>
+
+          <div class="mapLegend">
+            <div class="mapLegendSection">
+              <p class="mapLegendTitle">Sensor Type</p>
+              <div class="mapLegendItems">
+                <div class="mapLegendItem">
+                  <span class="mapLegendLetter">A</span>
+                  <span class="mapLegendLabel">Air Quality</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendLetter">T</span>
+                  <span class="mapLegendLabel">Temperature</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendLetter">H</span>
+                  <span class="mapLegendLabel">Humidity</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendLetter">N</span>
+                  <span class="mapLegendLabel">Noise</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mapLegendSection">
+              <p class="mapLegendTitle">Severity</p>
+              <div class="mapLegendItems">
+                <div class="mapLegendItem">
+                  <span class="mapLegendSwatch isNormal"></span>
+                  <span class="mapLegendLabel">Normal</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendSwatch isUnavailable"></span>
+                  <span class="mapLegendLabel">Unavailable / Offline</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendSwatch isElevated"></span>
+                  <span class="mapLegendLabel">Elevated</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendSwatch isHigh"></span>
+                  <span class="mapLegendLabel">High</span>
+                </div>
+                <div class="mapLegendItem">
+                  <span class="mapLegendSwatch isCritical"></span>
+                  <span class="mapLegendLabel">Critical</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="mapCanvas" id="mapCanvas">
+          <img
+            src="../../assets/images/hamilton-map.png"
+            alt="Hamilton map"
+            class="mapImage"
+          >
+          <div class="mapMarkers" id="mapMarkers"></div>
+        </div> -->
+      </section>
+
+      <section class="zonesSection">
+        <div class="zonesSectionHeader">
+          <h3 class="zonesSectionTitle">5-Minute Averages by Zone</h3>
+          <p class="zonesSectionText">
+            Each metric below is aggregated across all sensors of that type in the zone over the last 5 minutes.
+          </p>
+        </div>
+
+        <div class="zoneList" id="zoneList"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+  if (!window.location.search.includes("city=")) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("city", "halton");
+    window.location.replace(url.toString());
+  }
+</script>
+  <script type="module" src="../../js/operator.js"></script>
+</body>
+</html>

@@ -34,8 +34,8 @@
 
         <div class="dashboardMetaRow">
           <span class="dashboardMetaItem">
-            Current Zone:
-            <strong id="zoneName">Downtown Core</strong>
+          Current City:
+          <strong id="zoneName">Hamilton</strong>
           </span>
           <span class="dashboardMetaDivider"></span>
           <span class="dashboardMetaItem">
@@ -46,26 +46,35 @@
       </div>
 
   <div class="zoneSelectorWrap">
-    <label for="zoneSearchInput" class="zoneSelectorLabel">Zone</label>
+    <label for="zoneSearchInput" class="zoneSelectorLabel">City</label>
 
     <div class="zoneSelector" id="zoneSelector">
       <input
         type="text"
         id="zoneSearchInput"
         class="zoneSearchInput"
-        placeholder="Search zone..."
+        placeholder="Search city..."
         autocomplete="off"
       >
       <div class="zoneDropdown" id="zoneDropdown"></div>
     </div>
   </div>
     </div>
+    <section class="publicAlertsPanel" id="publicAlertsPanel" aria-label="Public alerts">
+  <div class="publicAlertsHeader">
+    <h3 class="publicAlertsTitle">Public Alerts</h3>
+    <span class="publicAlertsCount" id="publicAlertsCount">0</span>
+  </div>
+
+  <div class="publicAlertsList" id="publicAlertsList">
+    <p class="publicAlertsEmpty">No public alerts right now.</p>
+  </div>
+</section>
 
     <section class="gaugeGrid" id="gaugeGrid"></section>
   </section>
 </main>
 
 <script type="module" src="frontend/js/script.js"></script>
-<script type="module" src="frontend/js/sensorData.js"></script>
 </body>
 </html>

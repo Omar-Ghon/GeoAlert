@@ -1,242 +1,300 @@
+$bg: #f6f1e8;
+$surface: #ffffff;
+$border: #dbc9a6;
+$text: #2f241d;
+$muted: #6c5c50;
+$accent: #8b5e34;
+$accent-dark: #6d4827;
+$green: #1f7a4d;
+$blue: #2d6cdf;
+$red: #c0392b;
+$shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: $bg;
+  color: $text;
+}
+
+.apiHeader {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: $accent-dark;
+  color: #fff;
+}
+
+.apiHeaderLeft,
+.apiHeaderCenter,
+.apiHeaderRight {
+  display: flex;
+  align-items: center;
+}
+
+.apiHeaderCenter {
+  justify-content: center;
+}
+
+.apiHeaderRight {
+  justify-content: flex-end;
+}
+
+.apiLogoLink {
+  display: inline-flex;
+  align-items: center;
+}
+
+.apiLogoImage {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.apiBrandTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.apiBackLink {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.apiBackLink:hover {
+  text-decoration: underline;
+}
+
 .apiPage {
-  min-height: calc(100vh - 88px);
-  padding: 36px 40px 56px;
-  background: #f4f8fb;
-}
-
-.apiShell {
-  width: 100%;
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
-
-  .backButton {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px;
-    border: 1px solid #cfdbe4;
-    border-radius: 10px;
-    background: #ffffff;
-    color: #16384c;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: background 0.2s ease;
-
-    &:hover {
-        background: #eaf2f7;
-    }
-    }
 
 .apiHero {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
-  margin-top: 4rem;
-}
-
-.apiHeroContent {
-  flex: 1;
-  padding: 32px;
-  border: 1px solid #d9e1e7;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
 }
 
 .apiEyebrow {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
   text-transform: uppercase;
-  color: #5d7282;
-}
-
-.apiHeading {
-  margin: 0 0 14px 0;
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: #16384c;
-}
-
-.apiLead {
-  margin-top: 1rem;
-  max-width: 820px;
-  font-size: 1.15rem;
-  line-height: 1.7;
-  color: #5d7282;
-}
-
-.apiHeroMeta {
-  width: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.apiMetaCard {
-  flex: 1;
-  padding: 22px 24px;
-  border: 1px solid #d9e1e7;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-}
-
-.apiMetaLabel {
-  font-size: 0.82rem;
-  font-weight: 700;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #5d7282;
-}
-
-.apiMetaValue {
-  font-size: 1.15rem;
+  font-size: 0.85rem;
+  color: $accent;
   font-weight: 700;
-  color: #16384c;
 }
 
-.apiSection {
-  margin-bottom: 28px;
-  padding: 28px;
-  border: 1px solid #d9e1e7;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.05);
+.apiHeroTitle {
+  margin: 0 0 0.75rem;
+  font-size: 2rem;
+  line-height: 1.15;
 }
 
-.apiSectionHeader {
-  margin-bottom: 20px;
-}
-
-.apiSectionTitle {
-  margin: 0 0 8px 0;
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: #16384c;
-}
-
-.apiSectionSubtitle {
+.apiHeroText {
   margin: 0;
-  font-size: 0.98rem;
-  color: #5d7282;
+  max-width: 780px;
+  color: $muted;
+  line-height: 1.6;
 }
 
-.apiTwoColumn {
+.apiGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
 }
 
-.apiInfoCard {
-  padding: 24px;
-  border: 1px solid #d9e1e7;
-  border-radius: 20px;
-  background: #fbfdff;
+.apiCard {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: $shadow;
 }
 
-.apiCardTitle {
-  margin: 0 0 12px 0;
-  font-size: 1.12rem;
-  font-weight: 700;
-  color: #16384c;
-}
-
-.apiCardText {
-  margin: 0 0 16px 0;
-  font-size: 0.97rem;
-  line-height: 1.65;
-  color: #5d7282;
-}
-
-.apiCodeBlock {
-  padding: 16px 18px;
-  border: 1px solid #d9e1e7;
-  border-radius: 16px;
-  background: #0f2230;
-  overflow-x: auto;
-
-  code,
-  pre {
-    margin: 0;
-    font-family: "Courier New", Courier, monospace;
-    font-size: 0.94rem;
-    line-height: 1.7;
-    color: #eaf4ff;
-    white-space: pre-wrap;
-  }
-}
-
-.endpointList {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 22px;
-}
-
-.endpointCard {
-  padding: 24px;
-  border: 1px solid #d9e1e7;
-  border-radius: 20px;
-  background: #fbfdff;
-}
-
-.endpointTopRow {
+.apiCardTop {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 0.9rem;
 }
 
-.endpointMethod {
+.apiMethod {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 64px;
-  height: 34px;
-  padding: 0 14px;
+  min-width: 62px;
+  padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  background: #1f5f85;
-  color: #ffffff;
-  font-size: 0.85rem;
+  color: #fff;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.8rem;
 }
 
-.endpointPath {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 1rem;
+.apiMethodGet {
+  background: $green;
+}
+
+.apiMethodPost {
+  background: $blue;
+}
+
+.apiPath {
+  font-size: 0.9rem;
+  background: #f3ece2;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  word-break: break-word;
+}
+
+.apiCardTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.apiCardText {
+  margin: 0 0 1rem;
+  color: $muted;
+  line-height: 1.55;
+}
+
+.apiExampleBlock {
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: #fbf8f2;
+  border: 1px solid #eee0c8;
+}
+
+.apiExampleLabel {
+  margin: 0 0 0.5rem;
   font-weight: 700;
-  color: #16384c;
+  font-size: 0.92rem;
 }
 
-.endpointDescription {
-  margin: 0 0 16px 0;
-  font-size: 0.97rem;
-  line-height: 1.65;
-  color: #5d7282;
-}
-
-.apiBulletList {
+.apiExampleBlock pre {
   margin: 0;
-  padding-left: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #352922;
+}
 
-  li {
-    margin-bottom: 10px;
-    color: #5d7282;
-    line-height: 1.6;
+.apiTryBlock {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.apiLabel {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.apiInput {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #cdb897;
+  border-radius: 10px;
+  background: #fff;
+  color: $text;
+  font-size: 0.95rem;
+}
+
+.apiInput:focus {
+  outline: 2px solid rgba(139, 94, 52, 0.18);
+  border-color: $accent;
+}
+
+.apiButton {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: $accent;
+  color: #fff;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.apiButton:hover {
+  background: $accent-dark;
+  transform: translateY(-1px);
+}
+
+.apiButtonSecondary {
+  background: #7c6a59;
+}
+
+.apiButtonSecondary:hover {
+  background: #635243;
+}
+
+.apiOutputSection {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: $shadow;
+}
+
+.apiOutputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.apiOutputTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.apiOutput {
+  margin: 0;
+  min-height: 280px;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #221b17;
+  color: #f4efe7;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 900px) {
+  .apiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .apiHeader {
+    grid-template-columns: 64px 1fr;
+  }
+
+  .apiHeaderRight {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .apiBrandTitle {
+    font-size: 1.2rem;
+  }
+
+  .apiHeroTitle {
+    font-size: 1.6rem;
   }
 }

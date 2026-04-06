@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoAlert Operator Alerts</title>
+  <link rel="stylesheet" href="../../styles/operator.css">
+</head>
+<body>
+  <header class="siteHeader operatorHeader">
+    <div class="siteHeaderLeft">
+      <a href="../../../index.html" class="siteHeaderLogo" aria-label="GeoAlert home">
+        <img src="../../assets/icons/logo.png" alt="GeoAlert logo">
+      </a>
+    </div>
+
+    <div class="siteHeaderCenter">
+      <h1 class="siteHeaderTitle">GeoAlert</h1>
+    </div>
+
+    <div class="siteHeaderRight">
+      <div class="accountMenu" id="accountMenu">
+        <button
+          class="accountMenuButton"
+          id="accountMenuButton"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <span class="accountMenuUsername">Halton Operator</span>
+          <span class="accountMenuChevron">⌄</span>
+        </button>
+
+        <div class="accountDropdown" id="accountDropdown">
+          <a href="../../../index.html" class="accountDropdownItem">Log out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="operatorPage">
+    <section class="operatorShell">
+      <div class="alertsPageTopBar">
+        <div class="alertsPageHeadingWrap">
+          <a href="operator.html" class="alertsBackLink">← Back to Dashboard</a>
+          <h2 class="operatorHeading">Halton Active Alerts</h2>
+          <p class="operatorSubheading">
+            Review, acknowledge, and manage currently active operator alerts for Halton.
+          </p>
+        </div>
+
+        <div class="alertsSummaryCards">
+          <article class="alertsSummaryCard isCritical">
+            <p class="alertsSummaryLabel">Active Alerts</p>
+            <p class="alertsSummaryValue" id="activeAlertsCount">0</p>
+          </article>
+
+          <article class="alertsSummaryCard">
+            <p class="alertsSummaryLabel">City</p>
+            <p class="alertsSummaryValue">Halton</p>
+          </article>
+        </div>
+      </div>
+
+      <section class="alertsQueuePanel">
+        <div class="alertsQueueHeader">
+          <div>
+            <h3 class="alertsQueueTitle">Operator Alert Queue</h3>
+            <p class="alertsQueueText">
+              Showing active alerts for Halton only. Each row includes the source, reading, message, and action controls.
+            </p>
+          </div>
+        </div>
+
+        <div class="alertsTableWrap">
+          <table class="alertsTable">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Zone</th>
+                <th>Source</th>
+                <th>Reading</th>
+                <th>Message</th>
+                <th>Triggered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="alertsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+  if (!window.location.search.includes("city=")) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("city", "halton");
+    window.location.replace(url.toString());
+  }
+</script>
+<script type="module" src="../../js/operator.js"></script>
+</body>
+</html>
